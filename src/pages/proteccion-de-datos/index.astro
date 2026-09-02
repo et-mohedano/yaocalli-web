@@ -1,0 +1,73 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Portico from '../../components/ui/Portico.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Hero from '../../components/ui/Hero.astro';
+
+const practicas = [
+  { titulo: 'Consentimiento informado', icono: 'check-circle', texto: 'Se aplica antes de la captura de cualquier dato sensible, dentro del protocolo que cubre la capacitación obligatoria de todo el personal de campo.' },
+  { titulo: 'Identificador operativo no nominativo', icono: 'users', texto: 'Cada persona encuestada se registra en la bitácora de campo con un identificador que no es su nombre, lo que permite detectar duplicidad sin comprometer su anonimato.' },
+  { titulo: 'Minimización de datos', icono: 'filter', texto: 'Se captura únicamente lo que el instrumento necesita para responder la pregunta del proyecto, no todo lo que sería posible preguntar.' },
+  { titulo: 'Control de acceso por roles', icono: 'shield', texto: 'El acceso a bases con datos personales se limita a los roles que efectivamente los necesitan para el proyecto en curso.' },
+  { titulo: 'Reportes agregados', icono: 'bar-chart', texto: 'Los entregables públicos o institucionales se presentan de forma agregada, sin datos identificables de personas.' },
+  { titulo: 'Verbalizaciones anonimizadas', icono: 'file-text', texto: 'Cuando un informe narrativo cita testimonios textuales, se anonimizan antes de incluirse.' },
+];
+---
+
+<Layout
+  title="Protección de datos personales | Yaocalli"
+  description="Cómo Yaocalli resguarda datos personales en sus proyectos: consentimiento informado, minimización, control de acceso y memoria pública sin datos identificables."
+>
+  <Hero variant="dark" class="py-16" segments={[{ text: 'Protección de datos personales' }]}>
+    <p class="mt-5 font-sans text-lg text-g-400 leading-relaxed">
+      Yaocalli trata datos de personas en situación de vulnerabilidad —solicitantes de apoyos sociales,
+      población encuestada en campo— y opera bajo la Ley General de Protección de Datos Personales en
+      Posesión de Sujetos Obligados, publicada en marzo de 2025. Esto no es un trámite: es parte del método.
+    </p>
+  </Hero>
+
+  <section class="bg-white py-14 border-b border-g-300">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl text-obsidiana mb-3">Marco normativo aplicable</h2>
+      <ul class="space-y-4 font-sans text-[17px] text-g-700 leading-relaxed">
+        <li>
+          <b class="text-obsidiana">Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados</b>
+          (20 de marzo de 2025). Obliga a tratamiento adecuado, relevante y estrictamente necesario; aviso de
+          privacidad; y derechos de acceso, rectificación, cancelación y oposición.
+        </li>
+        <li>
+          <b class="text-obsidiana">Ley General de Transparencia y Acceso a la Información Pública</b>
+          (20 de marzo de 2025). La respuesta operativa es memoria pública con resultados agregados y sin
+          datos identificables.
+        </li>
+        <li>
+          <b class="text-obsidiana">Normas oficiales mexicanas</b> NOM-014-SSA3-2013, NOM-043-SSA2-2012 y
+          NOM-251-SSA1-2009, en proyectos de asistencia social donde aplican.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="bg-cal py-14">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl text-obsidiana mb-8">Prácticas de campo</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {practicas.map((p) => (
+          <div class="border-t-2 border-jade pt-4 bg-white p-5 -mt-0">
+            <span class="w-9 h-9 flex items-center justify-center rounded-sm bg-jade-wash text-jade-deep mb-3">
+              <Icon name={p.icono} size={18} />
+            </span>
+            <h3 class="font-serif font-bold text-lg text-obsidiana">{p.titulo}</h3>
+            <p class="mt-2 font-sans text-sm text-g-700 leading-relaxed">{p.texto}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Portico
+    titulo="¿Necesita evaluar nuestra política de datos antes de contratar?"
+    texto="Consulte también el aviso de privacidad."
+    cta={{ etiqueta: 'Ver aviso de privacidad', href: '/aviso-de-privacidad/' }}
+  />
+</Layout>

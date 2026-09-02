@@ -1,0 +1,118 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Portico from '../../components/ui/Portico.astro';
+import IndexBar from '../../components/ui/IndexBar.astro';
+import DonutChart from '../../components/ui/DonutChart.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Hero from '../../components/ui/Hero.astro';
+import { casos } from '../../data/casos';
+import { getServicioBySlug } from '../../data/servicios';
+
+export async function getStaticPaths() {
+  return casos.map((caso, i) => ({
+    params: { slug: caso.slug },
+    props: { caso, siguiente: casos[(i + 1) % casos.length] },
+  }));
+}
+
+const { caso, siguiente } = Astro.props;
+const serviciosAplicados = caso.serviciosSlugs.map((s) => getServicioBySlug(s)!).filter(Boolean);
+
+const dimensionesImpas = [
+  { etiqueta: 'Condición económica del hogar', valor: 25, color: '#6B3722' },
+  { etiqueta: 'Inseguridad alimentaria', valor: 20, color: '#2C4C3F' },
+  { etiqueta: 'Vulnerabilidad prioritaria', valor: 15, color: '#3F6B5A' },
+  { etiqueta: 'Red de apoyo y apoyos sociales', valor: 15, color: '#56826D' },
+  { etiqueta: 'Salud y funcionalidad', valor: 15, color: '#7FA593' },
+  { etiqueta: 'Condiciones de vivienda', valor: 10, color: '#A3C0B3' },
+];
+---
+
+<Layout title={`${caso.titulo} | Yaocalli`} description={caso.metaDescripcion}>
+  <Hero variant="dark" class="py-14" segments={[{ text: caso.titulo }]}>
+    <p slot="eyebrow" class="font-sans text-sm text-g-400 mb-2"><a href="/casos/" class="hover:underline">Casos</a></p>
+    <p slot="eyebrow" class="font-sans text-sm text-barro-pale">{caso.institucion}{caso.anio ? ` · ${caso.anio}` : ''}</p>
+    <p class="mt-4 font-sans text-sm text-g-400">
+      Líneas de servicio: {serviciosAplicados.map((s) => s.nombre).join(' · ')}
+    </p>
+  </Hero>
+
+  <section class="bg-cal py-10 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {caso.escala.map((e, i) => (
+        <div class="bg-jade-wash border-t-2 border-jade px-5 py-5">
+          <Icon name={['trending-up', 'users', 'shield', 'layers'][i % 4]} size={18} class="text-jade-deep mb-2" />
+          <p class="font-sans text-xs text-g-600">{e.etiqueta}</p>
+          <p class="font-sans font-bold text-obsidiana mt-1 leading-snug">{e.valor}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="bg-white py-14">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-2 gap-10">
+      <div>
+        <h2 class="font-serif font-bold text-2xl text-obsidiana mb-4">El problema</h2>
+        <p class="font-sans text-[17px] text-g-700 leading-relaxed">{caso.elProblema}</p>
+      </div>
+      <div>
+        <h2 class="font-serif font-bold text-2xl text-obsidiana mb-4">Qué se hizo</h2>
+        <ul class="space-y-3 font-sans text-[17px] text-g-700 leading-relaxed">
+          {caso.queSeHizo.map((punto) => (
+            <li class="flex gap-3">
+              <Icon name="check-circle" size={19} class="text-barro shrink-0 mt-0.5" />
+              <span>{punto}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-jade-wash py-10 border-y border-jade-pale">
+    <div class="max-w-4xl mx-auto px-5 sm:px-8">
+      <p class="font-sans text-xs uppercase tracking-wide text-jade-deep font-medium mb-2">Visualización</p>
+      <p class="font-serif text-lg text-obsidiana leading-relaxed">{caso.visualizacionDescripcion}</p>
+      {caso.slug === 'indice-municipal-prioridad-asistencia-social' && (
+        <>
+          <IndexBar etiquetas={['Baja', 'Media', 'Alta', 'Muy alta']} class="mt-5 mb-8" />
+          <DonutChart datos={dimensionesImpas} sufijo=" pts" centro="100" centroSub="puntos" />
+        </>
+      )}
+    </div>
+  </section>
+
+  <section class="bg-white py-14 border-b border-g-300">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl text-obsidiana mb-4">Resultado</h2>
+      <p class="font-sans text-[17px] text-g-700 leading-relaxed">{caso.resultado}</p>
+
+      {caso.enlaces && caso.enlaces.length > 0 && (
+        <div class="mt-8 pt-6 border-t border-g-300">
+          <p class="font-sans text-xs uppercase tracking-wide text-g-600 font-medium mb-3">Recursos de este proyecto</p>
+          <ul class="space-y-2">
+            {caso.enlaces.map((enlace) => (
+              <li>
+                <a
+                  href={enlace.href}
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-flex items-center gap-1.5 font-sans text-sm font-medium text-barro-deep hover:underline"
+                >
+                  <Icon name="file-text" size={15} />
+                  {enlace.etiqueta}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <Portico
+    titulo="Siguiente caso"
+    texto={siguiente.titulo}
+    cta={{ etiqueta: 'Ver caso', href: `/casos/${siguiente.slug}/` }}
+  />
+</Layout>

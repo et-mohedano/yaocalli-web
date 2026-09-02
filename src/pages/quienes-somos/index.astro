@@ -1,0 +1,118 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Portico from '../../components/ui/Portico.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Hero from '../../components/ui/Hero.astro';
+import { ORGANIZACION } from '../../data/organizacion';
+
+const pilares = [
+  {
+    titulo: 'Método auditable',
+    icono: 'shield',
+    texto: 'Toda cifra viaja con su ficha técnica: universo, marco muestral, error por dominio, efecto de diseño, tasas de respuesta y semilla aleatoria documentada. La aleatoriedad es un hecho verificable, no una declaración.',
+  },
+  {
+    titulo: 'Territorio como unidad de análisis',
+    icono: 'map',
+    texto: 'Manzana, sección, colonia y municipio. Capas de INEGI, CONEVAL y CONAPO cruzadas con levantamiento propio y georreferenciado. El promedio estatal esconde justo lo que hay que decidir.',
+  },
+  {
+    titulo: 'Sistema, no entregable suelto',
+    icono: 'layers',
+    texto: 'Cada proyecto deja instalada la capacidad: base de datos, tablero, app de campo, pipeline. El cliente termina con un instrumento que opera, no con un PDF que envejece.',
+  },
+];
+
+const capacidad = [
+  { area: 'Ciencia de datos y lenguaje natural', icono: 'cpu', items: 'Procesamiento de lenguaje natural, análisis de sentimientos, modelado de tópicos con LDA, embeddings vectoriales, regresiones, máquinas de soporte vectorial, redes neuronales, árboles de decisión.' },
+  { area: 'Inteligencia geoespacial', icono: 'map', items: 'PostGIS, importación de trazas GPX, mapas de calor, análisis de buffers con la Red Nacional de Caminos, capas de INEGI y CONEVAL.' },
+  { area: 'Ingeniería de datos y ETL', icono: 'database', items: 'Apache NiFi, Python con Pandas, NumPy y Scikit-learn, scripting en R, PostgreSQL, SQLite.' },
+  { area: 'Desarrollo web y GovTech', icono: 'network', items: 'Python con Django, Astro, React y React Native, PHP con Laravel, Tailwind CSS, Docker y Docker Compose.' },
+  { area: 'Visualización e inteligencia de negocio', icono: 'bar-chart', items: 'Looker Studio, Power BI, Tableau.' },
+  { area: 'Métodos estadísticos', icono: 'target', items: 'Muestreo estratificado con afijación mixta, corrección por población finita, análisis de componentes principales, alfa de Cronbach y omega de McDonald, correlaciones policóricas, modelos de respuesta ordinal, aprendizaje supervisado.' },
+];
+---
+
+<Layout
+  title="Quiénes somos: Yaocalli Consultoría y Estrategia"
+  description="Yaocalli traduce datos de opinión, demografía y territorio en herramientas de decisión de gobierno: método auditable, geoespacial fino y sistemas propios."
+>
+  <Hero variant="dark" class="py-16" segments={[{ text: 'Quiénes somos' }]}>
+    <p class="mt-5 font-sans text-lg text-g-400 leading-relaxed">{ORGANIZACION.posicionamiento}</p>
+    <p class="mt-4 font-sans text-[17px] text-g-400 leading-relaxed">
+      La mayoría de las casas encuestadoras entregan un número. Yaocalli entrega el número, el instrumento
+      que lo produjo, la ficha técnica que lo respalda y el sistema con el que se puede volver a levantar
+      el año que viene.
+    </p>
+  </Hero>
+
+  <section class="bg-white py-14 border-b border-g-300">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl text-obsidiana mb-4">El nombre</h2>
+      <p class="font-sans text-[17px] text-g-700 leading-relaxed">
+        En náhuatl clásico, <em>yaocalli</em> aparece registrado en el vocabulario de fray Alonso de Molina (1571)
+        como fortaleza, el edificio, y en documentos coloniales del siglo XVII como casa de guerra. Se compone de
+        <em> yaotl</em> (guerra, contrincante) y <em>calli</em> (casa): es, literalmente, la sala desde donde se
+        planea una campaña. Ese es el relato de marca, y es también el trabajo diario de la firma: el lugar al
+        que se entra antes de decidir, donde se despliega el mapa y se cuentan las cifras.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-cal py-14 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl text-obsidiana mb-8">Tres pilares</h2>
+      <div class="grid sm:grid-cols-3 gap-6">
+        {pilares.map((p) => (
+          <div class="border-t-2 border-barro pt-4">
+            <span class="w-10 h-10 flex items-center justify-center rounded-sm bg-barro-wash text-barro-deep mb-3">
+              <Icon name={p.icono} size={20} />
+            </span>
+            <h3 class="font-serif font-bold text-lg text-obsidiana">{p.titulo}</h3>
+            <p class="mt-2 font-sans text-sm text-g-700 leading-relaxed">{p.texto}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-14 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl text-obsidiana mb-3">Capacidad instalada</h2>
+      <p class="font-sans text-[17px] text-g-700 leading-relaxed max-w-2xl mb-8">
+        Backend, procesamiento de lenguaje natural, modelos de aprendizaje automático para análisis de
+        sentimientos, mapeo geoespacial avanzado y automatización de procesos a gran escala. Se ha trabajado
+        con dependencias municipales y estatales de Hidalgo y con organismos internacionales.
+      </p>
+      <dl class="grid sm:grid-cols-2 gap-x-10 gap-y-6 font-sans">
+        {capacidad.map((c) => (
+          <div class="border-b border-g-200 pb-4 flex gap-3">
+            <span class="w-8 h-8 flex items-center justify-center rounded-sm bg-jade-wash text-jade-deep shrink-0">
+              <Icon name={c.icono} size={16} />
+            </span>
+            <div>
+              <dt class="text-sm font-medium text-obsidiana">{c.area}</dt>
+              <dd class="mt-1 text-sm text-g-700 leading-relaxed">{c.items}</dd>
+            </div>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="bg-jade-wash border-b border-jade-pale py-10">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8">
+      <p class="font-sans text-xs uppercase tracking-wide text-jade-deep font-medium mb-2">Equipo</p>
+      <p class="font-sans text-[17px] text-g-800 leading-relaxed">
+        Yaocalli trabaja con un equipo reducido de especialistas en ciencia de datos, análisis geoespacial,
+        desarrollo de software y metodología de encuestas. Las fichas individuales del equipo se publicarán
+        en una siguiente versión de este sitio.
+      </p>
+    </div>
+  </section>
+
+  <Portico
+    titulo="¿Necesita verificar nuestra experiencia con una institución específica?"
+    cta={{ etiqueta: 'Escribirnos', href: '/contacto/' }}
+  />
+</Layout>

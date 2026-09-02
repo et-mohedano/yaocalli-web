@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import ArticleCard from '../../components/blog/ArticleCard.astro';
+import Hero from '../../components/ui/Hero.astro';
+import { PILARES_EDITORIALES } from '../../data/organizacion';
+
+const todas = (await getCollection('blog')).sort((a, b) => a.data.pubDate.getTime() - b.data.pubDate.getTime());
+const pilarFiltro = Astro.url.searchParams.get('tema');
+const visibles = pilarFiltro ? todas.filter((p) => p.data.pilar === pilarFiltro) : todas;
+---
+
+<Layout
+  title="Publicaciones sobre encuestas, datos y territorio | Yaocalli"
+  description="Notas metodológicas sobre encuestas, cartografía, índices de priorización y decisión pública, con método explicado y límites declarados."
+>
+  <Hero variant="light" class="py-14" segments={[{ text: 'Publicaciones' }]}>
+    <p class="mt-4 font-sans text-lg text-g-700 leading-relaxed max-w-2xl">
+      Notas metodológicas, no artículos de opinión. Cada una responde una pregunta real,
+      explica el método y declara sus límites.
+    </p>
+  </Hero>
+
+  <section class="bg-cal py-14">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-4 gap-10">
+      <div class="lg:col-span-3 grid sm:grid-cols-2 gap-5">
+        {visibles.map((p) => (
+          <ArticleCard
+            titulo={p.data.title}
+            pilar={p.data.pilar}
+            descripcion={p.data.description}
+            href={p.data.proximamente ? undefined : `/publicaciones/${p.id}/`}
+            fecha={p.data.pubDate}
+            tiempoLectura={p.data.tiempoLectura}
+            proximamente={p.data.proximamente}
+          />
+        ))}
+      </div>
+      <aside class="lg:col-span-1">
+        <h2 class="font-sans text-xs uppercase tracking-wide text-g-600 font-medium mb-3">Temas</h2>
+        <ul class="space-y-2 font-sans text-sm">
+          <li><a href="/publicaciones/" class:list={[!pilarFiltro ? 'text-barro-deep font-medium' : 'text-g-700 hover:text-barro-deep']}>Todos</a></li>
+          {PILARES_EDITORIALES.map((pilar) => (
+            <li><a href={`/publicaciones/?tema=${encodeURIComponent(pilar)}`} class:list={[pilarFiltro === pilar ? 'text-barro-deep font-medium' : 'text-g-700 hover:text-barro-deep']}>{pilar}</a></li>
+          ))}
+        </ul>
+      </aside>
+    </div>
+  </section>
+</Layout>

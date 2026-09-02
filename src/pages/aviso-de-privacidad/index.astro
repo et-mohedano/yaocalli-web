@@ -1,0 +1,66 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Hero from '../../components/ui/Hero.astro';
+import { CORREO_CONTACTO } from '../../utils/contacto';
+import { ORGANIZACION } from '../../data/organizacion';
+---
+
+<Layout
+  title="Aviso de privacidad | Yaocalli Consultoría y Estrategia"
+  description="Aviso de privacidad de Yaocalli: qué datos se recaban, para qué, y cómo ejercer los derechos de acceso, rectificación, cancelación y oposición."
+>
+  <Hero variant="light" class="py-14" containerClass="max-w-3xl mx-auto px-5 sm:px-8" segments={[{ text: 'Aviso de privacidad' }]}>
+    <p class="mt-4 font-sans text-sm text-g-600">Última actualización: 1 de septiembre de 2026.</p>
+  </Hero>
+
+  <section class="bg-white py-14">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8 font-sans text-[17px] text-g-800 leading-relaxed space-y-8">
+      <div>
+        <h2 class="font-serif font-bold text-xl text-obsidiana mb-3">Responsable</h2>
+        <p>
+          {ORGANIZACION.nombre}, con cobertura de operación en {ORGANIZACION.estado}, {ORGANIZACION.pais},
+          es responsable del tratamiento de los datos personales que se recaban a través de este sitio y
+          de los proyectos de levantamiento de información que ejecuta. Contacto: <a href={`mailto:${CORREO_CONTACTO}`} class="text-barro-deep underline">{CORREO_CONTACTO}</a>.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-serif font-bold text-xl text-obsidiana mb-3">Marco normativo</h2>
+        <p>
+          El tratamiento de datos personales se realiza conforme a la Ley General de Protección de Datos
+          Personales en Posesión de Sujetos Obligados, publicada el 20 de marzo de 2025, que obliga a un
+          tratamiento adecuado, relevante y estrictamente necesario, así como al respeto de los derechos de
+          acceso, rectificación, cancelación y oposición (derechos ARCO).
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-serif font-bold text-xl text-obsidiana mb-3">Qué datos se recaban</h2>
+        <p>A través del formulario de contacto: institución u organización, nombre, cargo, correo institucional, teléfono (opcional), servicio de interés y descripción de la necesidad. En proyectos de levantamiento en campo, los datos que defina el instrumento de cada proyecto, siempre con consentimiento informado previo cuando se trata de datos sensibles.</p>
+      </div>
+
+      <div>
+        <h2 class="font-serif font-bold text-xl text-obsidiana mb-3">Finalidad</h2>
+        <p>Evaluar y responder solicitudes de propuesta técnica; ejecutar los proyectos de levantamiento, análisis y desarrollo contratados; y, quiénes así lo consientan, dar seguimiento posterior por correo o WhatsApp.</p>
+      </div>
+
+      <div>
+        <h2 class="font-serif font-bold text-xl text-obsidiana mb-3">Cómo se protegen los datos en campo</h2>
+        <p>Los proyectos de levantamiento aplican consentimiento informado previo a la captura de datos sensibles, control de acceso por roles, minimización de datos y reportes agregados sin datos identificables. Las personas encuestadas se identifican mediante un identificador operativo no nominativo, no por su nombre, en la bitácora de campo.</p>
+      </div>
+
+      <div>
+        <h2 class="font-serif font-bold text-xl text-obsidiana mb-3">Derechos ARCO</h2>
+        <p>
+          Cualquier persona puede solicitar el acceso, rectificación, cancelación u oposición al tratamiento
+          de sus datos personales escribiendo a <a href={`mailto:${CORREO_CONTACTO}`} class="text-barro-deep underline">{CORREO_CONTACTO}</a>.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-serif font-bold text-xl text-obsidiana mb-3">Cambios a este aviso</h2>
+        <p>Este aviso puede actualizarse para reflejar cambios normativos o en el tratamiento de datos. La fecha de última actualización aparece al inicio de esta página.</p>
+      </div>
+    </div>
+  </section>
+</Layout>

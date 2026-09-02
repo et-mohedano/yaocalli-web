@@ -1,0 +1,80 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ContactForm from '../../components/forms/ContactForm.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Hero from '../../components/ui/Hero.astro';
+import { CORREO_CONTACTO, TELEFONO_CONTACTO, CIUDAD, ESTADO, COBERTURA, linkWhatsappGeneral } from '../../utils/contacto';
+---
+
+<Layout
+  title="Contacto — Solicitar propuesta técnica | Yaocalli"
+  description="Solicite una propuesta técnica de encuestas, cartografía, índices o software. Respondemos en uno a dos días hábiles, o por WhatsApp para lo urgente."
+>
+  <Hero variant="light" class="py-14" containerClass="max-w-3xl mx-auto px-5 sm:px-8" segments={[{ text: 'Contacto' }]}>
+    <p class="mt-4 font-sans text-lg text-g-700 leading-relaxed">
+      Al enviar el formulario, la solicitud se revisa y se responde en un plazo de uno a dos días hábiles
+      con una primera lectura del problema y los siguientes pasos. Para necesidades urgentes de campaña,
+      el canal más rápido es WhatsApp.
+    </p>
+  </Hero>
+
+  <section class="bg-white py-14">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-5 gap-12">
+      <div class="lg:col-span-3">
+        <h2 class="font-serif font-bold text-xl text-obsidiana mb-6">Solicitar propuesta</h2>
+        <ContactForm />
+      </div>
+
+      <aside class="lg:col-span-2 space-y-8">
+        <div>
+          <h2 class="font-serif font-bold text-xl text-obsidiana mb-4">Canales directos</h2>
+          <ul class="space-y-4 font-sans text-[17px] text-g-800">
+            <li class="flex gap-3">
+              <span class="w-9 h-9 flex items-center justify-center rounded-sm bg-jade-wash text-jade-deep shrink-0"><Icon name="whatsapp" size={17} /></span>
+              <span>
+                <span class="block text-g-600 text-xs">WhatsApp</span>
+                <a href={linkWhatsappGeneral()} target="_blank" rel="noopener" class="text-barro-deep font-medium">Escribir por WhatsApp</a>
+              </span>
+            </li>
+            <li class="flex gap-3">
+              <span class="w-9 h-9 flex items-center justify-center rounded-sm bg-jade-wash text-jade-deep shrink-0"><Icon name="mail" size={17} /></span>
+              <span>
+                <span class="block text-g-600 text-xs">Correo institucional</span>
+                <a href={`mailto:${CORREO_CONTACTO}`} class="text-barro-deep font-medium">{CORREO_CONTACTO}</a>
+              </span>
+            </li>
+            <li class="flex gap-3">
+              <span class="w-9 h-9 flex items-center justify-center rounded-sm bg-jade-wash text-jade-deep shrink-0"><Icon name="phone" size={17} /></span>
+              <span>
+                <span class="block text-g-600 text-xs">Teléfono</span>
+                <span>{TELEFONO_CONTACTO === 'PENDIENTE' ? 'Por publicar' : TELEFONO_CONTACTO}</span>
+              </span>
+            </li>
+            <li class="flex gap-3">
+              <span class="w-9 h-9 flex items-center justify-center rounded-sm bg-jade-wash text-jade-deep shrink-0"><Icon name="map-pin" size={17} /></span>
+              <span>
+                <span class="block text-g-600 text-xs">Cobertura</span>
+                <span>{COBERTURA}, con sede en {CIUDAD}, {ESTADO}</span>
+              </span>
+            </li>
+            <li class="flex gap-3">
+              <span class="w-9 h-9 flex items-center justify-center rounded-sm bg-jade-wash text-jade-deep shrink-0"><Icon name="clock" size={17} /></span>
+              <span>
+                <span class="block text-g-600 text-xs">Horario de atención</span>
+                <span>Lunes a viernes, 9:00 a 18:00, hora del centro de México</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-jade-wash border-t-2 border-jade p-5">
+          <p class="font-sans text-sm text-g-800 leading-relaxed">
+            Sus datos se tratan conforme a la Ley General de Protección de Datos Personales en Posesión de
+            Sujetos Obligados. Consulte qué se hace con la información enviada en el
+            <a href="/aviso-de-privacidad/" class="text-barro-deep font-medium underline">aviso de privacidad</a>.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,44 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ServiceCard from '../../components/service/ServiceCard.astro';
+import Portico from '../../components/ui/Portico.astro';
+import Hero from '../../components/ui/Hero.astro';
+import { servicios } from '../../data/servicios';
+---
+
+<Layout
+  title="Servicios de inteligencia de datos y política pública | Yaocalli"
+  description="Encuestas, cartografía electoral, escucha digital, índices de priorización, tableros y software a la medida para gobiernos y campañas en Hidalgo."
+>
+  <Hero variant="light" class="py-14" segments={[{ text: 'Servicios' }]}>
+    <p class="mt-4 font-sans text-lg text-g-700 leading-relaxed max-w-2xl">
+      Seis líneas de trabajo que comparten el mismo método: ninguna afirmación sin su respaldo visible,
+      ninguna cifra sin ficha técnica. Se contratan por separado o combinadas dentro de un mismo proyecto.
+    </p>
+  </Hero>
+
+  <section class="bg-cal py-14">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {servicios.map((s) => <ServiceCard servicio={s} />)}
+    </div>
+  </section>
+
+  <section class="bg-jade-wash border-y border-jade-pale py-10">
+    <div class="max-w-4xl mx-auto px-5 sm:px-8">
+      <p class="font-sans text-xs uppercase tracking-wide text-jade-deep font-medium">Proyectos que integran varias líneas</p>
+      <p class="mt-2 font-serif text-lg text-obsidiana leading-relaxed">
+        Los proyectos más grandes casi nunca usan una sola línea de servicio. La auditoría territorial de transporte y
+        movilidad que cubrió 84 municipios combinó encuestas, cartografía y software en un mismo operativo: sin la app
+        de campo no había forma de coordinar a 80 encuestadores, y sin la cartografía no había forma de verificar la
+        cobertura real contra la Red Nacional de Caminos.
+      </p>
+      <a href="/casos/auditoria-territorial-transporte-movilidad/" class="inline-block mt-4 font-sans text-sm font-medium text-jade-deep">Ver este caso →</a>
+    </div>
+  </section>
+
+  <Portico
+    titulo="¿No sabe cuál servicio necesita?"
+    texto="Cuéntenos el problema, no el servicio. Lo identificamos juntos."
+    cta={{ etiqueta: 'Contarnos el problema', href: '/contacto/' }}
+  />
+</Layout>

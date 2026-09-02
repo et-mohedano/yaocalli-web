@@ -1,0 +1,30 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CaseCard from '../../components/case/CaseCard.astro';
+import Portico from '../../components/ui/Portico.astro';
+import Hero from '../../components/ui/Hero.astro';
+import { casos } from '../../data/casos';
+---
+
+<Layout
+  title="Casos de estudio: gobierno y datos en Hidalgo | Yaocalli"
+  description="Proyectos de encuestas, índices de priorización y sistemas propios ejecutados para gobiernos e instituciones, con escala, método y resultado verificable."
+>
+  <Hero variant="light" class="py-14" segments={[{ text: 'Casos' }]}>
+    <p class="mt-4 font-sans text-lg text-g-700 leading-relaxed max-w-2xl">
+      Proyectos con resultado verificable. Se publican con autorización expresa o anonimizados —
+      ninguna captura muestra datos personales ni cifras no públicas de un cliente.
+    </p>
+  </Hero>
+
+  <section class="bg-cal py-14">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {casos.map((c) => <CaseCard caso={c} />)}
+    </div>
+  </section>
+
+  <Portico
+    titulo="¿Su proyecto se parece a alguno de estos?"
+    cta={{ etiqueta: 'Solicitar propuesta', href: '/contacto/' }}
+  />
+</Layout>

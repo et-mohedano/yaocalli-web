@@ -1,0 +1,207 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/ui/Button.astro';
+import StatCard from '../components/ui/StatCard.astro';
+import ServiceCard from '../components/service/ServiceCard.astro';
+import ArticleCard from '../components/blog/ArticleCard.astro';
+import Portico from '../components/ui/Portico.astro';
+import Icon from '../components/ui/Icon.astro';
+import TypewriterHeading from '../components/ui/TypewriterHeading.astro';
+import BarChart from '../components/ui/BarChart.astro';
+import HidalgoMap from '../components/ui/HidalgoMap.astro';
+import { servicios } from '../data/servicios';
+import { getCasoBySlug } from '../data/casos';
+import { CIFRAS_CAPACIDAD, USUARIOS_POR_SISTEMA, ENCUESTAS_POR_PROYECTO } from '../data/organizacion';
+
+const casoDestacado = getCasoBySlug('auditoria-territorial-transporte-movilidad')!;
+
+const publicaciones = (await getCollection('blog'))
+  .sort((a, b) => a.data.pubDate.getTime() - b.data.pubDate.getTime());
+const publicadas = publicaciones.filter((p) => !p.data.proximamente);
+const proximas = publicaciones.filter((p) => p.data.proximamente);
+const destacadasInicio = [...publicadas, ...proximas].slice(0, 3);
+
+const metodo = [
+  { titulo: 'Diseño de instrumentos', texto: 'El instrumento se construye a partir de la pregunta que hay que responder, no de un formato genérico.', icono: 'clipboard' },
+  { titulo: 'Levantamiento y control de calidad', texto: 'Campo con app offline-first y gabinete independiente que audita duplicidad y consistencia.', icono: 'users' },
+  { titulo: 'Procesamiento y modelado', texto: 'Ponderación, márgenes por dominio, índices y modelos, con la memoria de cálculo documentada.', icono: 'cpu' },
+  { titulo: 'Entrega y transferencia', texto: 'El cliente termina con base de datos, informe y, cuando aplica, el sistema que lo sostiene.', icono: 'check-circle' },
+];
+---
+
+<Layout
+  title="Consultoría de datos y encuestas en Hidalgo | Yaocalli"
+  description="Encuestas, cartografía electoral, índices de priorización y sistemas de decisión para gobiernos y campañas en Hidalgo. Método auditable, no un número suelto."
+>
+  <!-- Encabezado principal -->
+  <section id="hero" class="hero-spotlight graticule bg-obsidiana text-cal py-20 sm:py-24 relative overflow-hidden" data-variant="dark">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 relative grid lg:grid-cols-5 gap-10 items-center">
+      <div class="lg:col-span-3">
+        <TypewriterHeading
+          as="h1"
+          class="font-serif font-normal text-[42px] sm:text-[60px] leading-[1.08] max-w-2xl"
+          segments={[{ text: 'La casa donde el dato ' }, { text: 'se vuelve decisión', italic: true }, { text: '.' }]}
+        />
+        <p class="mt-6 font-sans text-lg sm:text-xl text-g-400 max-w-xl leading-relaxed">
+          Encuestas, cartografía electoral, índices de priorización, tableros y los sistemas que los sostienen,
+          para gobiernos municipales, estatales y campañas que tienen que defender una decisión.
+        </p>
+        <div class="mt-8">
+          <Button href="/contacto/">Solicitar propuesta</Button>
+        </div>
+      </div>
+      <div class="lg:col-span-2">
+        <HidalgoMap />
+      </div>
+    </div>
+  </section>
+
+  <!-- Cifras de capacidad -->
+  <section class="bg-cal py-14">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-8">Capacidad instalada, en números</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {CIFRAS_CAPACIDAD.map((c) => (
+          <StatCard valor={c.valor} numero={c.numero} etiqueta={c.etiqueta} tipo={c.tipo} icono={c.icono} destacado={c.destacado} />
+        ))}
+      </div>
+      <p class="mt-4 font-sans text-xs text-g-600">
+        Cifras de proyectos con institución no publicadas por nombre — ver ficha de cada caso en <a href="/casos/" class="underline text-barro-deep">casos de estudio</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Desglose de capacidad: gráficas reales por sistema y por proyecto -->
+  <section class="bg-white py-14 border-y border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-2">La capacidad, desglosada</h2>
+      <p class="font-sans text-g-700 max-w-2xl mb-8">
+        Ningún sistema carga solo la cifra: cada uno tiene su propia base de usuarios y su propio volumen de
+        registros. El censo territorial de transporte se reporta aparte, en las cifras de arriba, porque su
+        escala —34,818 encuestas— aplastaría cualquier otra barra en la misma escala.
+      </p>
+      <div class="grid lg:grid-cols-2 gap-10">
+        <div>
+          <h3 class="font-sans text-sm font-medium text-g-700 mb-4">Usuarios activos por sistema propio</h3>
+          <BarChart datos={USUARIOS_POR_SISTEMA} />
+        </div>
+        <div>
+          <h3 class="font-sans text-sm font-medium text-g-700 mb-4">Encuestas y registros de índices y diagnóstico</h3>
+          <BarChart datos={ENCUESTAS_POR_PROYECTO} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Servicios -->
+  <section class="bg-cal py-14 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-8">Seis líneas de trabajo, un mismo método</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {servicios.map((s) => <ServiceCard servicio={s} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Método + caso destacado -->
+  <section class="bg-white py-14 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-5 gap-10">
+      <div class="lg:col-span-3">
+        <h2 class="font-serif font-bold text-2xl text-obsidiana mb-6">Cómo se hace</h2>
+        <ol class="grid sm:grid-cols-2 gap-5">
+          {metodo.map((m, i) => (
+            <li class="border-l-2 border-barro pl-4">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 flex items-center justify-center rounded-sm bg-barro-wash text-barro-deep shrink-0">
+                  <Icon name={m.icono} size={15} />
+                </span>
+                <p class="font-sans text-xs text-barro font-medium">Paso {i + 1}</p>
+              </div>
+              <p class="font-serif font-bold text-lg text-obsidiana mt-2">{m.titulo}</p>
+              <p class="font-sans text-sm text-g-700 mt-1 leading-relaxed">{m.texto}</p>
+            </li>
+          ))}
+        </ol>
+        <a href="/metodologia/" class="inline-flex items-center gap-1.5 mt-6 font-sans text-sm font-medium text-barro-deep">
+          Ver la metodología completa <Icon name="arrow-right" size={15} />
+        </a>
+      </div>
+      <div class="lg:col-span-2 bg-jade-wash border-t-2 border-jade p-6">
+        <p class="font-sans text-xs uppercase tracking-wide text-jade-deep font-medium">Caso destacado</p>
+        <h3 class="font-serif font-bold text-xl text-obsidiana mt-2 leading-snug">{casoDestacado.titulo}</h3>
+        <p class="mt-3 font-sans text-sm text-g-700 leading-relaxed">{casoDestacado.elProblema}</p>
+        <a href={`/casos/${casoDestacado.slug}/`} class="inline-flex items-center gap-1.5 mt-4 font-sans text-sm font-medium text-barro-deep">
+          Ver el caso completo <Icon name="arrow-right" size={15} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Últimas publicaciones -->
+  <section class="bg-cal py-14 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <div class="flex items-baseline justify-between mb-8">
+        <h2 class="font-serif font-bold text-2xl text-obsidiana">Últimas publicaciones</h2>
+        <a href="/publicaciones/" class="font-sans text-sm font-medium text-barro-deep">Ver todas →</a>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-5">
+        {destacadasInicio.map((p) => (
+          <ArticleCard
+            titulo={p.data.title}
+            pilar={p.data.pilar}
+            descripcion={p.data.description}
+            href={`/publicaciones/${p.id}/`}
+            fecha={p.data.pubDate}
+            tiempoLectura={p.data.tiempoLectura}
+            proximamente={p.data.proximamente}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Portico
+    titulo="Que una decisión de gobierno se sostenga con evidencia, no con impresión."
+    texto="Cuéntenos qué necesitan decidir. Respondemos en uno a dos días hábiles."
+    cta={{ etiqueta: 'Solicitar propuesta', href: '/contacto/' }}
+    conWhatsapp
+  />
+</Layout>
+
+<style>
+  /* Efecto de spotlight: un resplandor cálido que sigue al cursor sobre la
+     retícula cartográfica del hero. Solo en dispositivos con puntero fino. */
+  .hero-spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(650px circle at var(--mx, 30%) var(--my, 30%), rgba(201, 143, 114, 0.32), rgba(140, 74, 47, 0.12) 35%, transparent 65%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .hero-spotlight.spotlight-active::before {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-spotlight::before {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const hero = document.getElementById('hero');
+  if (hero && matchMedia('(pointer: fine)').matches) {
+    hero.addEventListener('pointermove', (e) => {
+      const rect = hero.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      hero.style.setProperty('--mx', `${x}%`);
+      hero.style.setProperty('--my', `${y}%`);
+      hero.classList.add('spotlight-active');
+    });
+    hero.addEventListener('pointerleave', () => hero.classList.remove('spotlight-active'));
+  }
+</script>

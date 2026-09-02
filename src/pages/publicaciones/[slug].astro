@@ -1,0 +1,104 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Portico from '../../components/ui/Portico.astro';
+import BarChart from '../../components/ui/BarChart.astro';
+import TypewriterHeading from '../../components/ui/TypewriterHeading.astro';
+import { getServicioBySlug } from '../../data/servicios';
+import { jsonLdArticulo } from '../../utils/seo';
+
+export async function getStaticPaths() {
+  const entradas = await getCollection('blog', (p) => !p.data.proximamente);
+  return entradas.map((entrada) => ({ params: { slug: entrada.id }, props: { entrada } }));
+}
+
+const { entrada } = Astro.props;
+const { Content } = await render(entrada);
+const servicioRelacionado = entrada.data.servicioRelacionado[0] ? getServicioBySlug(entrada.data.servicioRelacionado[0]) : undefined;
+
+const fechaPublicacion = entrada.data.pubDate.toISOString().slice(0, 10);
+const fechaModificacion = (entrada.data.updatedDate ?? entrada.data.pubDate).toISOString().slice(0, 10);
+const fechaTexto = entrada.data.pubDate.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<Layout
+  title={`${entrada.data.title.length > 58 ? entrada.data.title.slice(0, 57) + '…' : entrada.data.title} | Yaocalli`}
+  description={entrada.data.description}
+  articulo={{ publicado: fechaPublicacion, modificado: fechaModificacion }}
+  jsonLd={[
+    jsonLdArticulo({
+      titulo: entrada.data.title,
+      descripcion: entrada.data.description,
+      fechaPublicacion,
+      fechaModificacion,
+      autor: entrada.data.autor,
+      slug: entrada.id,
+    }),
+  ]}
+>
+  <article>
+    <header class="graticule-light bg-cal py-14 border-b border-g-300">
+      <div class="max-w-3xl mx-auto px-5 sm:px-8">
+        <p class="font-sans text-sm text-barro font-medium mb-2">
+          <a href="/publicaciones/" class="hover:underline">Publicaciones</a> / {entrada.data.pilar}
+        </p>
+        <TypewriterHeading
+          as="h1"
+          class="font-serif font-bold text-3xl sm:text-4xl text-obsidiana leading-tight"
+          segments={[{ text: entrada.data.title }]}
+        />
+        <p class="mt-4 font-sans text-sm text-g-600">
+          {fechaTexto}{entrada.data.tiempoLectura ? ` · ${entrada.data.tiempoLectura} de lectura` : ''} · Por {entrada.data.autor}
+        </p>
+      </div>
+    </header>
+
+    <div class="bg-white py-14">
+      <div
+        class="prose prose-lg max-w-[68ch] mx-auto px-5 sm:px-8 font-serif prose-headings:font-serif prose-headings:text-obsidiana prose-a:text-barro-deep prose-a:no-underline hover:prose-a:underline prose-strong:text-obsidiana prose-table:font-sans prose-th:text-g-700"
+      >
+        <Content />
+
+        {entrada.id === 'cuantas-encuestas-hacen-falta-para-medir-un-municipio' && (
+          <div class="not-prose my-10 bg-cal border border-g-300 p-6 sm:p-8">
+            <p class="font-sans text-xs uppercase tracking-wide text-g-600 font-medium mb-5">
+              Escenario A contra escenario B, Mineral de la Reforma
+            </p>
+            <div class="grid sm:grid-cols-2 gap-8">
+              <div>
+                <p class="font-sans text-sm font-medium text-obsidiana mb-2">Tamaño de muestra</p>
+                <BarChart
+                  datos={[
+                    { etiqueta: 'Escenario A', valor: 380 },
+                    { etiqueta: 'Escenario B', valor: 600, destacado: true },
+                  ]}
+                  max={600}
+                />
+              </div>
+              <div>
+                <p class="font-sans text-sm font-medium text-obsidiana mb-2">Margen de error (puntos, menor es mejor)</p>
+                <BarChart
+                  datos={[
+                    { etiqueta: 'Escenario A', valor: 4.4 },
+                    { etiqueta: 'Escenario B', valor: 3.2, destacado: true },
+                  ]}
+                  max={4.4}
+                  sufijo=" pts"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </article>
+
+  <Portico
+    titulo={servicioRelacionado ? `Así se aplica: ${servicioRelacionado.nombre}` : 'Solicitar propuesta'}
+    texto={servicioRelacionado ? servicioRelacionado.resumenListado : undefined}
+    cta={{
+      etiqueta: servicioRelacionado ? 'Ver el servicio' : 'Solicitar propuesta',
+      href: servicioRelacionado ? `/servicios/${servicioRelacionado.slug}/` : '/contacto/',
+    }}
+  />
+</Layout>

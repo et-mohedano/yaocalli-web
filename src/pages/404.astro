@@ -1,0 +1,28 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/ui/Button.astro';
+import Hero from '../components/ui/Hero.astro';
+---
+
+<Layout
+  title="Página no encontrada | Yaocalli"
+  description="Esta página no existe o cambió de dirección. Vuelva al inicio o consulte los servicios de Yaocalli Consultoría y Estrategia."
+>
+  <Hero
+    variant="dark"
+    class="min-h-[60vh] flex items-center py-20"
+    containerClass="max-w-2xl mx-auto px-5 sm:px-8 text-center"
+    titleClass="text-3xl sm:text-4xl"
+    segments={[{ text: 'Esta dirección no existe, o cambió.' }]}
+  >
+    <p slot="eyebrow" class="font-sans text-sm text-barro-pale mb-3">Error 404</p>
+    <p class="mt-4 font-sans text-lg text-g-400">
+      Las URLs de este sitio no se mueven sin dejar redirección, así que si llegó aquí desde un enlace
+      antiguo, seguramente la página se movió sin avisar. Empiece de nuevo desde aquí.
+    </p>
+    <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+      <Button href="/">Ir al inicio</Button>
+      <Button href="/servicios/" variante="outline">Ver servicios</Button>
+    </div>
+  </Hero>
+</Layout>

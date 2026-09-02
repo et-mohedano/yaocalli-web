@@ -1,0 +1,106 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Portico from '../../components/ui/Portico.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Hero from '../../components/ui/Hero.astro';
+
+const etapas = [
+  {
+    id: 'diseno-de-instrumentos',
+    titulo: 'Diseño de instrumentos',
+    icono: 'clipboard',
+    texto: [
+      'Ningún cuestionario se construye desde un formato genérico. Cada instrumento parte de la pregunta que la institución necesita responder y se somete a revisión de no inducción de respuesta antes de salir a campo.',
+      'Cuando el proyecto lo exige, el instrumento pasa por prueba cognitiva previa con un grupo reducido de personas del perfil real, con protocolo de pensamiento en voz alta. El criterio de aceptación es comprensión unívoca en al menos 11 de cada 12 casos por reactivo; si un reactivo no lo alcanza, se reescribe antes del levantamiento definitivo.',
+      'En instrumentos con validación psicométrica —como los índices de priorización—, se revisa consistencia interna con un umbral de alfa de Cronbach de al menos 0.70 por escala, con revisión de cualquier reactivo cuya eliminación eleve el coeficiente en más de 0.03.',
+    ],
+  },
+  {
+    id: 'levantamiento-y-control-de-calidad',
+    titulo: 'Levantamiento y control de calidad',
+    icono: 'users',
+    texto: [
+      'El equipo de campo trabaja con aplicación móvil offline-first: captura sin conexión y sincronización asíncrona al recuperar señal, con catálogos únicos para todo el operativo y un identificador operativo no nominativo por persona aplicadora.',
+      'Antes de levantar, se documenta y archiva la semilla aleatoria usada para la selección sistemática de grupos y de personas dentro de cada grupo. Ese requisito convierte la aleatoriedad en un hecho auditable y no en una declaración.',
+      'Toda persona aplicadora recibe capacitación previa —hasta seis horas en operativos grandes— sobre marco conceptual del instrumento, lectura literal del reactivo, manejo de preguntas condicionadas, protocolo de consentimiento informado y criterios de no inducción de respuesta, con ejercicio de aplicación supervisada al cierre.',
+      'Un equipo de gabinete independiente del equipo de campo audita duplicidad, consistencia y patrones de llenado, y da seguimiento georreferenciado al avance por zona en operativos de gran escala.',
+    ],
+  },
+  {
+    id: 'procesamiento-y-modelado',
+    titulo: 'Procesamiento y modelado',
+    icono: 'cpu',
+    texto: [
+      'Los datos se ponderan según el diseño muestral, con corrección por población finita y márgenes de error calculados por dominio de interés, no solo a nivel global.',
+      'Cuando el proyecto lo requiere, se construyen índices dimensionales, se aplica reducción de dimensionalidad por componentes principales —la misma técnica que usa CONEVAL para el Índice de Rezago Social—, y se modelan asociaciones con métodos de respuesta ordinal o aprendizaje supervisado.',
+      'En análisis territorial, las capas propias se cruzan con fuentes oficiales de INEGI, CONEVAL y CONAPO sobre infraestructura geoespacial en PostgreSQL con PostGIS. En análisis de texto, se aplican modelos de procesamiento de lenguaje natural para sentimiento, temas latentes y similitud vectorial.',
+    ],
+  },
+  {
+    id: 'entrega-y-transferencia',
+    titulo: 'Entrega y transferencia',
+    icono: 'check-circle',
+    texto: [
+      'Cada proyecto deja instalada la capacidad, no solo el resultado: base de datos depurada, ficha técnica completa, informe con lectura interpretativa y, cuando aplica, el tablero o el sistema que sostiene el proyecto.',
+      'La documentación técnica y, en proyectos de software, el código fuente, se transfieren al cliente junto con capacitación de operación. El objetivo es que el instrumento siga funcionando cuando el proyecto termine, no que dependa de manera indefinida de un proveedor externo.',
+    ],
+  },
+];
+---
+
+<Layout
+  title="Metodología: cómo trabajamos con evidencia | Yaocalli"
+  description="Diseño de instrumentos, levantamiento con control de calidad, procesamiento estadístico y transferencia de capacidad: el método explicado, no escondido."
+>
+  <Hero variant="light" class="py-14" containerClass="max-w-3xl mx-auto px-5 sm:px-8" segments={[{ text: 'Metodología' }]}>
+    <p class="mt-4 font-sans text-lg text-g-700 leading-relaxed">
+      El método es el producto. Explicar cómo se calcula un índice o cómo se controla la calidad de un
+      levantamiento no regala nada: demuestra que existe. Cuatro etapas se repiten en todos los proyectos,
+      con ajustes según el servicio.
+    </p>
+  </Hero>
+
+  <nav aria-label="Etapas de la metodología" class="bg-white border-b border-g-300 py-4 sticky top-[72px] z-30">
+    <ul class="max-w-3xl mx-auto px-5 sm:px-8 flex flex-wrap gap-x-6 gap-y-2 font-sans text-sm">
+      {etapas.map((e, i) => (
+        <li>
+          <a href={`#${e.id}`} class="inline-flex items-center gap-1.5 text-barro-deep hover:underline">
+            <Icon name={e.icono} size={14} />{i + 1}. {e.titulo}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <section class="bg-white py-14">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8 space-y-16">
+      {etapas.map((etapa, i) => (
+        <div id={etapa.id} class="scroll-mt-32">
+          <div class="flex items-center gap-3 mb-1">
+            <span class="w-10 h-10 flex items-center justify-center rounded-sm bg-barro-wash text-barro-deep shrink-0">
+              <Icon name={etapa.icono} size={20} />
+            </span>
+            <p class="font-sans text-xs text-barro font-medium">Etapa {i + 1} de {etapas.length}</p>
+          </div>
+          <h2 class="font-serif font-bold text-2xl text-obsidiana mb-4 mt-3">{etapa.titulo}</h2>
+          <div class="space-y-4 font-sans text-[17px] text-g-700 leading-relaxed">
+            {etapa.texto.map((p) => <p>{p}</p>)}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="bg-jade-wash border-y border-jade-pale py-10">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8">
+      <p class="font-serif text-lg text-obsidiana leading-relaxed italic">
+        «Sin bitácora de campo, la afirmación de representatividad no es verificable.»
+      </p>
+    </div>
+  </section>
+
+  <Portico
+    titulo="¿Quiere ver el método aplicado a un caso real?"
+    cta={{ etiqueta: 'Ver casos de estudio', href: '/casos/' }}
+  />
+</Layout>

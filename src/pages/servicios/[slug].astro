@@ -1,0 +1,196 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Portico from '../../components/ui/Portico.astro';
+import FichaTecnica from '../../components/service/FichaTecnica.astro';
+import FaqAccordion from '../../components/ui/FaqAccordion.astro';
+import IndexBar from '../../components/ui/IndexBar.astro';
+import DonutChart from '../../components/ui/DonutChart.astro';
+import Icon from '../../components/ui/Icon.astro';
+import TypewriterHeading from '../../components/ui/TypewriterHeading.astro';
+import CaseCard from '../../components/case/CaseCard.astro';
+import ArticleCard from '../../components/blog/ArticleCard.astro';
+import { servicios } from '../../data/servicios';
+import { casos } from '../../data/casos';
+import { jsonLdServicio, jsonLdFaq } from '../../utils/seo';
+
+export async function getStaticPaths() {
+  return servicios.map((servicio) => ({ params: { slug: servicio.slug }, props: { servicio } }));
+}
+
+const { servicio } = Astro.props;
+const casosRelacionados = casos.filter((c) => servicio.casosSlugs.includes(c.slug));
+const publicaciones = await getCollection('blog', (p) => servicio.publicacionesSlugs.includes(p.id) && !p.data.proximamente);
+
+// Ejemplo real de dimensiones ponderadas — datos del caso IMPAS (DIF Mineral de la
+// Reforma), citados en src/data/casos.ts. Solo se muestra en la ficha de índices.
+const dimensionesImpas = [
+  { etiqueta: 'Condición económica del hogar', valor: 25, color: '#6B3722' },
+  { etiqueta: 'Inseguridad alimentaria', valor: 20, color: '#2C4C3F' },
+  { etiqueta: 'Vulnerabilidad prioritaria', valor: 15, color: '#3F6B5A' },
+  { etiqueta: 'Red de apoyo y apoyos sociales', valor: 15, color: '#56826D' },
+  { etiqueta: 'Salud y funcionalidad', valor: 15, color: '#7FA593' },
+  { etiqueta: 'Condiciones de vivienda', valor: 10, color: '#A3C0B3' },
+];
+---
+
+<Layout
+  title={servicio.tituloSEO}
+  description={servicio.metaDescripcion}
+  jsonLd={[jsonLdServicio(servicio.nombre, servicio.metaDescripcion), jsonLdFaq(servicio.faqs)]}
+>
+  <!-- Encabezado + ficha técnica -->
+  <section class="graticule-light bg-cal py-14 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-5 gap-10 items-start">
+      <div class="lg:col-span-3">
+        <p class="font-sans text-sm text-barro font-medium mb-2">
+          <a href="/servicios/" class="hover:underline">Servicios</a> / {servicio.nombre}
+        </p>
+        <TypewriterHeading as="h1" class="font-serif font-bold text-3xl sm:text-4xl text-obsidiana" segments={[{ text: servicio.h1 }]} />
+        <p class="mt-5 font-sans text-lg text-g-700 leading-relaxed">{servicio.primerParrafo}</p>
+        <p class="mt-4 font-sans text-sm text-g-600"><b class="text-obsidiana font-medium">Para quién es:</b> {servicio.paraQuien}</p>
+      </div>
+      <div class="lg:col-span-2">
+        <FichaTecnica servicioNombre={servicio.nombre} />
+      </div>
+    </div>
+  </section>
+
+  <!-- Qué entrega -->
+  <section class="bg-white py-14">
+    <div class="max-w-4xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl text-obsidiana mb-6">Qué entrega</h2>
+      <ul class="grid sm:grid-cols-2 gap-x-8 gap-y-3 font-sans text-[17px] text-g-800">
+        {servicio.queEntrega.map((item) => (
+          <li class="flex gap-3">
+            <Icon name="check-circle" size={19} class="text-barro shrink-0 mt-0.5" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Cómo se hace + ficha de rigor -->
+  <section class="bg-cal py-14 border-y border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-5 gap-10">
+      <div class="lg:col-span-3">
+        <h2 class="font-serif font-bold text-2xl text-obsidiana mb-6">Cómo se hace</h2>
+        <ol class="space-y-5">
+          {servicio.comoSeHace.map((etapa, i) => (
+            <li class="border-l-2 border-g-400 pl-5">
+              <p class="font-sans text-xs text-g-600 font-medium">Etapa {i + 1}</p>
+              <p class="font-serif font-bold text-lg text-obsidiana mt-0.5">{etapa.titulo}</p>
+              <p class="font-sans text-[17px] text-g-700 mt-1 leading-relaxed">{etapa.texto}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div class="lg:col-span-2">
+        <div class="bg-jade-wash border-t-2 border-jade p-6 sticky top-24">
+          <h2 class="font-sans text-xs uppercase tracking-wide text-jade-deep font-medium mb-4">Ficha de rigor</h2>
+          <dl class="space-y-3 font-sans text-sm">
+            {servicio.fichaRigor.map((d) => (
+              <div class="border-b border-jade-pale/40 pb-2">
+                <dt class="text-g-600 text-xs">{d.etiqueta}</dt>
+                <dd class="text-obsidiana font-medium mt-0.5">{d.valor}</dd>
+              </div>
+            ))}
+          </dl>
+          {servicio.slug === 'indices-y-priorizacion' && (
+            <div class="mt-5 pt-4 border-t border-jade-pale/40">
+              <p class="text-g-600 text-xs mb-2 font-sans">Niveles de prioridad resultantes</p>
+              <IndexBar />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ejemplo real de dimensiones ponderadas (solo índices y priorización) -->
+  {servicio.slug === 'indices-y-priorizacion' && (
+    <section class="bg-white py-14 border-b border-g-300">
+      <div class="max-w-4xl mx-auto px-5 sm:px-8">
+        <h2 class="font-serif font-bold text-2xl text-obsidiana mb-2">Un ejemplo real de reparto de peso</h2>
+        <p class="font-sans text-[17px] text-g-700 leading-relaxed mb-8 max-w-2xl">
+          Las seis dimensiones del Índice Municipal de Prioridad para la Asistencia Social (IMPAS), construido
+          para el DIF de Mineral de la Reforma. Ningún peso es arbitrario: cada uno se fundamenta en la revisión
+          documental del instrumento.
+        </p>
+        <DonutChart datos={dimensionesImpas} sufijo=" pts" centro="100" centroSub="puntos" />
+        <a href="/casos/indice-municipal-prioridad-asistencia-social/" class="inline-flex items-center gap-1.5 mt-6 font-sans text-sm font-medium text-barro-deep">
+          Ver el caso completo <Icon name="arrow-right" size={15} />
+        </a>
+      </div>
+    </section>
+  )}
+
+  <!-- Preguntas frecuentes -->
+  <section class="bg-white py-14">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl text-obsidiana mb-6">Preguntas frecuentes</h2>
+      <FaqAccordion items={servicio.faqs} />
+
+      {servicio.enlacesEjemplo && servicio.enlacesEjemplo.length > 0 && (
+        <div class="mt-8 pt-6 border-t border-g-300">
+          <ul class="space-y-2">
+            {servicio.enlacesEjemplo.map((enlace) => (
+              <li>
+                <a
+                  href={enlace.href}
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-flex items-center gap-1.5 font-sans text-sm font-medium text-barro-deep hover:underline"
+                >
+                  <Icon name="bar-chart" size={15} />
+                  {enlace.etiqueta}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Casos y publicaciones relacionadas -->
+  {(casosRelacionados.length > 0 || publicaciones.length > 0) && (
+    <section class="bg-cal py-14 border-t border-g-300">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-5 gap-10">
+        {casosRelacionados.length > 0 && (
+          <div class="lg:col-span-3">
+            <h2 class="font-serif font-bold text-xl text-obsidiana mb-5">Casos con este servicio</h2>
+            <div class="grid sm:grid-cols-2 gap-5">
+              {casosRelacionados.map((c) => <CaseCard caso={c} />)}
+            </div>
+          </div>
+        )}
+        {publicaciones.length > 0 && (
+          <div class="lg:col-span-2">
+            <h2 class="font-serif font-bold text-xl text-obsidiana mb-5">Publicaciones relacionadas</h2>
+            <div class="space-y-4">
+              {publicaciones.map((p) => (
+                <ArticleCard
+                  titulo={p.data.title}
+                  pilar={p.data.pilar}
+                  descripcion={p.data.description}
+                  href={`/publicaciones/${p.id}/`}
+                  fecha={p.data.pubDate}
+                  tiempoLectura={p.data.tiempoLectura}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <Portico
+    titulo={`Solicitar propuesta de ${servicio.nombre.toLowerCase()}`}
+    texto="Con el servicio ya preseleccionado en el formulario."
+    cta={{ etiqueta: 'Solicitar propuesta', href: `/contacto/?servicio=${servicio.slug}` }}
+    conWhatsapp
+  />
+</Layout>
