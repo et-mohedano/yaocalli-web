@@ -1,0 +1,55 @@
+---
+import Logo from '../ui/Logo.astro';
+import { NAV_PRINCIPAL } from '../../data/organizacion';
+
+const rutaActual = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-40 bg-cal/95 backdrop-blur border-b border-g-300">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between gap-4">
+    <a href="/" class="shrink-0" aria-label="Yaocalli Consultoría y Estrategia — inicio">
+      <Logo />
+    </a>
+
+    <nav aria-label="Navegación principal" class="hidden lg:flex items-center gap-7 font-sans text-[17px]">
+      {NAV_PRINCIPAL.map((item) => {
+        const activo = rutaActual === item.href || rutaActual.startsWith(item.href);
+        return (
+          <a
+            href={item.href}
+            class={`py-2 border-b-2 transition-colors ${activo ? 'border-barro text-obsidiana' : 'border-transparent text-g-700 hover:text-obsidiana hover:border-g-400'}`}
+            aria-current={activo ? 'page' : undefined}
+          >
+            {item.etiqueta}
+          </a>
+        );
+      })}
+    </nav>
+
+    <a
+      href="/contacto/"
+      class="hidden sm:inline-flex items-center gap-2 font-sans font-medium text-sm px-4 py-2.5 rounded-sm bg-barro text-cal hover:bg-barro-deep transition-colors min-h-11"
+    >
+      Solicitar propuesta
+    </a>
+
+    <details class="lg:hidden relative">
+      <summary class="list-none cursor-pointer p-2 -mr-2 min-w-11 min-h-11 flex items-center justify-center" aria-label="Abrir menú">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"></path>
+        </svg>
+      </summary>
+      <nav
+        aria-label="Navegación móvil"
+        class="absolute right-0 top-full mt-1 w-64 bg-cal border border-g-300 rounded-sm shadow-lg font-sans text-[17px] py-2"
+      >
+        {NAV_PRINCIPAL.map((item) => (
+          <a href={item.href} class="block px-4 py-3 min-h-11 hover:bg-g-100">{item.etiqueta}</a>
+        ))}
+        <a href="/contacto/" class="block mx-4 my-2 text-center px-4 py-2.5 rounded-sm bg-barro text-cal min-h-11 leading-[1.4]">
+          Solicitar propuesta
+        </a>
+      </nav>
+    </details>
+  </div>
+</header>

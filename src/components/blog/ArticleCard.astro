@@ -1,0 +1,42 @@
+---
+interface Props {
+  titulo: string;
+  pilar: string;
+  descripcion: string;
+  href?: string;
+  fecha?: Date;
+  tiempoLectura?: string;
+  proximamente?: boolean;
+  class?: string;
+}
+const { titulo, pilar, descripcion, href, fecha, tiempoLectura, proximamente = false, class: className = '' } = Astro.props;
+
+const fechaTexto = fecha
+  ? fecha.toLocaleDateString('es-MX', { year: 'numeric', month: 'long' })
+  : undefined;
+
+const Tag = proximamente ? 'div' : 'a';
+---
+
+<Tag
+  {...proximamente ? {} : { href }}
+  class:list={[
+    'block border border-g-300 p-6 transition-colors',
+    proximamente ? 'bg-g-100 opacity-70' : 'bg-white hover:border-barro',
+    className,
+  ]}
+>
+  <div class="flex items-center gap-3 font-sans text-xs text-g-600">
+    <span class="uppercase tracking-wide text-jade-deep font-medium">{pilar}</span>
+    {proximamente ? (
+      <span class="bg-g-300 text-g-700 px-2 py-0.5 rounded-sm">Próximamente</span>
+    ) : (
+      <>
+        {fechaTexto && <span>{fechaTexto}</span>}
+        {tiempoLectura && <span>· {tiempoLectura}</span>}
+      </>
+    )}
+  </div>
+  <h3 class="mt-2 font-serif font-bold text-xl text-obsidiana leading-snug">{titulo}</h3>
+  <p class="mt-2 font-sans text-sm text-g-700 leading-relaxed">{descripcion}</p>
+</Tag>

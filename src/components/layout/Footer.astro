@@ -1,0 +1,51 @@
+---
+import Logo from '../ui/Logo.astro';
+import Icon from '../ui/Icon.astro';
+import { NAV_PRINCIPAL, NAV_LEGAL, ORGANIZACION } from '../../data/organizacion';
+import { CORREO_CONTACTO, TELEFONO_CONTACTO } from '../../utils/contacto';
+---
+
+<footer class="bg-obsidiana text-g-400 font-sans">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <Logo variante="dark" />
+      <p class="mt-4 text-sm leading-relaxed max-w-xs">{ORGANIZACION.descripcion}</p>
+    </div>
+
+    <div>
+      <h2 class="text-cal text-sm font-medium mb-3">Mapa del sitio</h2>
+      <ul class="space-y-2 text-sm">
+        {NAV_PRINCIPAL.map((item) => (
+          <li><a href={item.href} class="hover:text-cal">{item.etiqueta}</a></li>
+        ))}
+        <li><a href="/contacto/" class="hover:text-cal">Contacto</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="text-cal text-sm font-medium mb-3">Datos de la firma</h2>
+      <ul class="space-y-2.5 text-sm">
+        <li class="flex items-center gap-2"><Icon name="shield" size={15} class="shrink-0 text-g-500" />{ORGANIZACION.nombre}</li>
+        <li class="flex items-center gap-2"><Icon name="map-pin" size={15} class="shrink-0 text-g-500" />{ORGANIZACION.ciudad}, {ORGANIZACION.estado}, {ORGANIZACION.pais}</li>
+        <li class="flex items-center gap-2"><Icon name="map" size={15} class="shrink-0 text-g-500" />Cobertura: {ORGANIZACION.estado}</li>
+        <li class="flex items-center gap-2"><Icon name="mail" size={15} class="shrink-0 text-g-500" /><a href={`mailto:${CORREO_CONTACTO}`} class="hover:text-cal">{CORREO_CONTACTO}</a></li>
+        <li class="flex items-center gap-2"><Icon name="phone" size={15} class="shrink-0 text-g-500" />{TELEFONO_CONTACTO === 'PENDIENTE' ? 'Teléfono: pendiente de publicar' : TELEFONO_CONTACTO}</li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="text-cal text-sm font-medium mb-3">Legal</h2>
+      <ul class="space-y-2 text-sm">
+        {NAV_LEGAL.map((item) => (
+          <li><a href={item.href} class="hover:text-cal">{item.etiqueta}</a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-white/10">
+    <p class="max-w-6xl mx-auto px-5 sm:px-8 py-5 text-xs text-g-500">
+      © {new Date().getFullYear()} {ORGANIZACION.nombre}. Todos los derechos reservados.
+    </p>
+  </div>
+</footer>

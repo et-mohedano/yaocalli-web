@@ -1,0 +1,31 @@
+---
+import type { Caso } from '../../data/casos';
+import { getServicioBySlug } from '../../data/servicios';
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  caso: Caso;
+  class?: string;
+}
+const { caso, class: className = '' } = Astro.props;
+const servicioPrincipal = getServicioBySlug(caso.serviciosSlugs[0]);
+---
+
+<a
+  href={`/casos/${caso.slug}/`}
+  class={`group block border-t-2 border-barro bg-white p-6 shadow-sm hover:shadow-md transition-shadow ${className}`}
+>
+  <div class="flex items-center gap-2 mb-3">
+    {servicioPrincipal && (
+      <span class="w-8 h-8 flex items-center justify-center rounded-sm bg-barro-wash text-barro-deep shrink-0">
+        <Icon name={servicioPrincipal.icono} size={16} />
+      </span>
+    )}
+    <p class="font-sans text-xs text-g-600">{caso.institucion}</p>
+  </div>
+  <h3 class="font-serif font-bold text-lg text-obsidiana group-hover:text-barro-deep transition-colors leading-snug">{caso.titulo}</h3>
+  <p class="mt-3 font-sans text-sm text-g-700 leading-relaxed line-clamp-3">{caso.elProblema}</p>
+  <span class="mt-4 inline-flex items-center gap-1.5 font-sans text-sm text-barro-deep font-medium">
+    Ver caso <Icon name="arrow-right" size={15} class="transition-transform group-hover:translate-x-1" />
+  </span>
+</a>

@@ -1,0 +1,25 @@
+---
+// Bloque de ficha técnica descargable. El PDF de dos páginas en sí requiere diseño
+// editorial fuera del alcance de este build de código — ver PENDIENTES.md, punto 26.
+interface Props {
+  servicioNombre: string;
+  class?: string;
+}
+const { servicioNombre, class: className = '' } = Astro.props;
+---
+
+<div class={`bg-jade-wash border border-jade-pale p-6 ${className}`}>
+  <p class="font-sans text-xs uppercase tracking-wide text-jade-deep font-medium">Ficha técnica</p>
+  <p class="mt-2 font-serif font-bold text-lg text-obsidiana leading-snug">
+    Alcance, método, entregables y tiempos de {servicioNombre.toLowerCase()} en dos páginas.
+  </p>
+  <p class="mt-2 font-sans text-sm text-g-700">Es el documento que se reenvía a quien decide.</p>
+  <button
+    type="button"
+    disabled
+    title="Ficha técnica en preparación — ver PENDIENTES.md"
+    class="mt-4 inline-flex items-center gap-2 font-sans text-sm font-medium px-4 py-2.5 min-h-11 rounded-sm bg-g-300 text-g-600 cursor-not-allowed"
+  >
+    Descargar ficha técnica (próximamente)
+  </button>
+</div>

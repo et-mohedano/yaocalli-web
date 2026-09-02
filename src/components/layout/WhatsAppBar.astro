@@ -1,0 +1,30 @@
+---
+// Barra fija de WhatsApp, solo en teléfono, especificada en 2_Arquitectura_y_Wireframes_Yaocalli.html
+// (sección 09): aparece al pasar el primer 25% de la página, nunca antes.
+import { linkWhatsappGeneral } from '../../utils/contacto';
+---
+
+<a
+  id="wa-bar"
+  class="wa-bar lg:hidden fixed left-0 right-0 bottom-0 z-40 flex items-center justify-center gap-2 px-4 py-3 min-h-11 bg-barro text-cal font-sans font-medium text-[17px] translate-y-full transition-transform duration-300"
+  href={linkWhatsappGeneral()}
+  rel="noopener"
+  target="_blank"
+>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.83L2 22l5.4-1.36a9.9 9.9 0 0 0 4.64 1.13h.01c5.46 0 9.9-4.45 9.9-9.9C21.95 6.45 17.5 2 12.04 2m0 18.09h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.79.84-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.34c0-4.53 3.7-8.22 8.24-8.22 2.2 0 4.27.86 5.83 2.42a8.16 8.16 0 0 1 2.41 5.81c0 4.53-3.7 8.22-8.24 8.22" /></svg>
+  Escribir por WhatsApp
+</a>
+
+<script>
+  const barra = document.getElementById('wa-bar');
+  if (barra) {
+    const alDesplazar = () => {
+      const total = document.body.scrollHeight - window.innerHeight;
+      const avance = total > 0 ? window.scrollY / total : 0;
+      barra.classList.toggle('translate-y-0', avance > 0.25);
+      barra.classList.toggle('translate-y-full', avance <= 0.25);
+    };
+    window.addEventListener('scroll', alDesplazar, { passive: true });
+    alDesplazar();
+  }
+</script>

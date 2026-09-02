@@ -1,0 +1,168 @@
+---
+import { servicios } from '../../data/servicios';
+---
+
+<form id="form-contacto" class="grid gap-5 font-sans" novalidate>
+  <!-- Campo trampa anti-spam: se oculta con CSS y debe permanecer vacío -->
+  <div class="absolute -left-[9999px]" aria-hidden="true">
+    <label for="sitio-web">No llenar este campo</label>
+    <input type="text" id="sitio-web" name="sitio-web" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div>
+    <label for="institucion" class="block text-sm font-medium text-obsidiana mb-1">Institución u organización *</label>
+    <input required id="institucion" name="institucion" type="text" class="w-full border border-g-400 bg-white px-3 py-2.5 min-h-11 text-[17px] focus:border-barro" />
+  </div>
+
+  <div class="grid sm:grid-cols-2 gap-5">
+    <div>
+      <label for="nombre" class="block text-sm font-medium text-obsidiana mb-1">Nombre *</label>
+      <input required id="nombre" name="nombre" type="text" class="w-full border border-g-400 bg-white px-3 py-2.5 min-h-11 text-[17px] focus:border-barro" />
+    </div>
+    <div>
+      <label for="cargo" class="block text-sm font-medium text-obsidiana mb-1">Cargo *</label>
+      <input required id="cargo" name="cargo" type="text" class="w-full border border-g-400 bg-white px-3 py-2.5 min-h-11 text-[17px] focus:border-barro" />
+    </div>
+  </div>
+
+  <div class="grid sm:grid-cols-2 gap-5">
+    <div>
+      <label for="correo" class="block text-sm font-medium text-obsidiana mb-1">Correo institucional *</label>
+      <input required id="correo" name="correo" type="email" inputmode="email" class="w-full border border-g-400 bg-white px-3 py-2.5 min-h-11 text-[17px] focus:border-barro" />
+    </div>
+    <div>
+      <label for="telefono" class="block text-sm font-medium text-obsidiana mb-1">Teléfono</label>
+      <input id="telefono" name="telefono" type="tel" inputmode="tel" class="w-full border border-g-400 bg-white px-3 py-2.5 min-h-11 text-[17px] focus:border-barro" />
+    </div>
+  </div>
+
+  <div>
+    <label for="servicio" class="block text-sm font-medium text-obsidiana mb-1">Servicio de interés *</label>
+    <select required id="servicio" name="servicio" class="w-full border border-g-400 bg-white px-3 py-2.5 min-h-11 text-[17px] focus:border-barro">
+      <option value="">Seleccionar…</option>
+      {servicios.map((s) => <option value={s.slug}>{s.nombre}</option>)}
+      <option value="no-se-cual">No sé cuál necesito</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="necesidad" class="block text-sm font-medium text-obsidiana mb-1">¿Qué necesita decidir? *</label>
+    <textarea required id="necesidad" name="necesidad" rows="4" class="w-full border border-g-400 bg-white px-3 py-2.5 text-[17px] focus:border-barro"></textarea>
+  </div>
+
+  <div>
+    <label for="ventana" class="block text-sm font-medium text-obsidiana mb-1">Ventana de tiempo *</label>
+    <select required id="ventana" name="ventana" class="w-full border border-g-400 bg-white px-3 py-2.5 min-h-11 text-[17px] focus:border-barro">
+      <option value="">Seleccionar…</option>
+      <option value="urgente">Urgente — menos de un mes</option>
+      <option value="corto">Uno a tres meses</option>
+      <option value="mediano">Tres a seis meses</option>
+      <option value="exploratorio">Exploratorio, sin fecha definida</option>
+    </select>
+  </div>
+
+  <div class="flex items-start gap-3">
+    <input required id="consentimiento" name="consentimiento" type="checkbox" class="mt-1 w-5 h-5 accent-barro" />
+    <label for="consentimiento" class="text-sm text-g-700">
+      Acepto el tratamiento de mis datos conforme al <a href="/aviso-de-privacidad/" class="text-barro-deep underline">aviso de privacidad</a>. *
+    </label>
+  </div>
+
+  <p id="form-error" class="hidden text-sm text-err font-medium" role="alert"></p>
+  <p id="form-ok" class="hidden text-sm text-ok-text font-medium" role="status">
+    Solicitud enviada. Respondemos en un plazo de uno a dos días hábiles.
+  </p>
+
+  <button
+    type="submit"
+    class="justify-self-start inline-flex items-center gap-2 font-medium text-[17px] px-6 py-3 min-h-11 rounded-sm bg-barro text-cal hover:bg-barro-deep transition-colors disabled:opacity-60"
+  >
+    <span data-estado="reposo">Enviar solicitud</span>
+    <span data-estado="cargando" class="hidden">Enviando…</span>
+  </button>
+</form>
+
+<script>
+  // TODO(pendiente): definir el destino real del envío — endpoint propio, servicio de
+  // formularios de terceros, o integración de correo. Ver PENDIENTES.md, punto 6.
+  // Mientras tanto: valida en cliente, guarda un borrador local ante fallo de conexión
+  // (regla móvil del documento 02) y muestra confirmación simulada.
+  const CLAVE_BORRADOR = 'yaocalli-borrador-contacto';
+  const form = document.getElementById('form-contacto') as HTMLFormElement | null;
+  const botonEnviar = form?.querySelector('button[type="submit"]');
+  const errorEl = document.getElementById('form-error');
+  const okEl = document.getElementById('form-ok');
+
+  if (form) {
+    // Restaurar borrador si existía
+    try {
+      const borrador = localStorage.getItem(CLAVE_BORRADOR);
+      if (borrador) {
+        const datos = JSON.parse(borrador);
+        for (const [campo, valor] of Object.entries(datos)) {
+          const el = form.elements.namedItem(campo as string) as HTMLInputElement | null;
+          if (el && el.type !== 'checkbox') el.value = valor as string;
+        }
+      }
+    } catch {
+      /* localStorage no disponible; sin borrador */
+    }
+
+    // Preselección de servicio vía ?servicio=slug (llegando desde una ficha de servicio)
+    const params = new URLSearchParams(location.search);
+    const servicioPre = params.get('servicio');
+    if (servicioPre) {
+      const select = form.elements.namedItem('servicio') as HTMLSelectElement | null;
+      if (select && [...select.options].some((o) => o.value === servicioPre)) {
+        select.value = servicioPre;
+      }
+    }
+
+    const guardarBorrador = () => {
+      try {
+        const datos = Object.fromEntries(new FormData(form).entries());
+        localStorage.setItem(CLAVE_BORRADOR, JSON.stringify(datos));
+      } catch {
+        /* sin almacenamiento disponible */
+      }
+    };
+    form.addEventListener('input', guardarBorrador);
+
+    form.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      errorEl?.classList.add('hidden');
+      okEl?.classList.add('hidden');
+
+      // Anti-spam: si el campo trampa viene lleno, se descarta silenciosamente
+      const trampa = (form.elements.namedItem('sitio-web') as HTMLInputElement)?.value;
+      if (trampa) return;
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      form.querySelectorAll('[data-estado]').forEach((el) => el.classList.add('hidden'));
+      form.querySelector('[data-estado="cargando"]')?.classList.remove('hidden');
+      botonEnviar?.setAttribute('disabled', 'true');
+
+      try {
+        // Sin endpoint real todavía: se documenta el intento y se limpia el borrador.
+        // Sustituir este bloque por la llamada real en cuanto exista destino (PENDIENTES.md).
+        await new Promise((resolver) => setTimeout(resolver, 600));
+        localStorage.removeItem(CLAVE_BORRADOR);
+        okEl?.classList.remove('hidden');
+        form.reset();
+      } catch {
+        if (errorEl) {
+          errorEl.textContent = 'No se pudo enviar. Tu solicitud quedó guardada en este dispositivo — inténtalo de nuevo o escribe por WhatsApp.';
+          errorEl.classList.remove('hidden');
+        }
+      } finally {
+        form.querySelectorAll('[data-estado]').forEach((el) => el.classList.add('hidden'));
+        form.querySelector('[data-estado="reposo"]')?.classList.remove('hidden');
+        botonEnviar?.removeAttribute('disabled');
+      }
+    });
+  }
+</script>

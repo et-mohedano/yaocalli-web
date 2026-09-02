@@ -1,0 +1,29 @@
+---
+import type { Servicio } from '../../data/servicios';
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  servicio: Servicio;
+  class?: string;
+}
+const { servicio, class: className = '' } = Astro.props;
+---
+
+<a
+  href={`/servicios/${servicio.slug}/`}
+  class={`group block border border-g-300 bg-white p-6 hover:border-barro hover:shadow-md transition-all ${className}`}
+>
+  <div class="w-11 h-11 flex items-center justify-center rounded-sm bg-jade-wash text-jade-deep mb-4 group-hover:bg-barro-wash group-hover:text-barro-deep transition-colors">
+    <Icon name={servicio.icono} size={22} />
+  </div>
+  <h3 class="font-serif font-bold text-xl text-obsidiana group-hover:text-barro-deep transition-colors">{servicio.nombre}</h3>
+  <p class="mt-2 font-sans text-sm text-g-700 leading-relaxed">{servicio.resumenListado}</p>
+  <ul class="mt-4 space-y-1.5 font-sans text-xs text-g-600">
+    {servicio.entregablesDestacados.map((e) => (
+      <li class="flex gap-2"><span class="text-barro">·</span>{e}</li>
+    ))}
+  </ul>
+  <span class="mt-4 inline-flex items-center gap-1.5 font-sans text-sm text-barro-deep font-medium">
+    Ver servicio <Icon name="arrow-right" size={15} class="transition-transform group-hover:translate-x-1" />
+  </span>
+</a>
