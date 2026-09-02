@@ -1,0 +1,74 @@
+---
+// Encabezado de página reutilizable: retícula cartográfica + resplandor que sigue
+// al cursor + título con efecto de máquina de escribir. Se usa en todas las
+// páginas del sitio para que el efecto del inicio sea consistente en todo el sitio.
+import TypewriterHeading from './TypewriterHeading.astro';
+
+interface Props {
+  variant?: 'dark' | 'light';
+  segments: { text: string; italic?: boolean }[];
+  titleClass?: string;
+  class?: string;
+  containerClass?: string;
+}
+const {
+  variant = 'dark',
+  segments,
+  titleClass = 'text-3xl sm:text-4xl',
+  class: className = '',
+  containerClass = 'max-w-4xl mx-auto px-5 sm:px-8',
+} = Astro.props as Props;
+const heroId = `hero-${Math.random().toString(36).slice(2, 9)}`;
+const bgClasses =
+  variant === 'dark' ? 'graticule bg-obsidiana text-cal' : 'graticule-light bg-cal text-obsidiana border-b border-g-300';
+---
+
+<section id={heroId} class:list={['hero-spotlight relative overflow-hidden', bgClasses, className]} data-variant={variant}>
+  <div class:list={[containerClass, 'relative']}>
+    <slot name="eyebrow" />
+    <TypewriterHeading as="h1" class:list={['font-serif font-bold', titleClass]} segments={segments} />
+    <slot />
+  </div>
+</section>
+
+<style>
+  .hero-spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .hero-spotlight[data-variant='dark']::before {
+    background: radial-gradient(650px circle at var(--mx, 30%) var(--my, 30%), rgba(201, 143, 114, 0.32), rgba(140, 74, 47, 0.12) 35%, transparent 65%);
+  }
+  .hero-spotlight[data-variant='light']::before {
+    background: radial-gradient(650px circle at var(--mx, 30%) var(--my, 30%), rgba(140, 74, 47, 0.1), transparent 65%);
+  }
+  .hero-spotlight.spotlight-active::before {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-spotlight::before {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const heroes = document.querySelectorAll<HTMLElement>('.hero-spotlight');
+  if (matchMedia('(pointer: fine)').matches) {
+    heroes.forEach((hero) => {
+      hero.addEventListener('pointermove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        hero.style.setProperty('--mx', `${x}%`);
+        hero.style.setProperty('--my', `${y}%`);
+        hero.classList.add('spotlight-active');
+      });
+      hero.addEventListener('pointerleave', () => hero.classList.remove('spotlight-active'));
+    });
+  }
+</script>

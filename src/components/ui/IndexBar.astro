@@ -1,0 +1,30 @@
+---
+// Barra de índice: elemento gráfico de marca (manual de identidad, sección 7).
+// Representa un valor dentro de un rango de cuatro tramos en jade, del lavado al profundo.
+interface Props {
+  etiquetas?: [string, string, string, string];
+  activo?: 0 | 1 | 2 | 3;
+  class?: string;
+}
+const { etiquetas = ['Bajo', 'Medio', 'Alto', 'Muy alto'], activo, class: className = '' } = Astro.props;
+const tramos = [
+  { bg: 'bg-jade-wash', text: 'text-jade-deep' },
+  { bg: 'bg-jade-pale', text: 'text-obsidiana' },
+  { bg: 'bg-jade', text: 'text-jade-wash' },
+  { bg: 'bg-jade-deep', text: 'text-jade-wash' },
+];
+---
+
+<div
+  class={`flex h-9 rounded-sm overflow-hidden font-sans text-xs max-w-md border border-jade/30 divide-x divide-jade/30 ${className}`}
+  role="img"
+  aria-label={`Escala de prioridad: ${etiquetas.join(', ')}`}
+>
+  {tramos.map((t, i) => (
+    <div
+      class:list={[t.bg, t.text, 'flex-1 flex items-center justify-center relative', activo === i && 'ring-2 ring-inset ring-obsidiana font-medium']}
+    >
+      {etiquetas[i]}
+    </div>
+  ))}
+</div>

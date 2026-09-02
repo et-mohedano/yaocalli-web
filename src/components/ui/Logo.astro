@@ -1,0 +1,25 @@
+---
+interface Props {
+  /** 'light' = muro obsidiana sobre fondo claro; 'dark' = muro cal sobre fondo oscuro */
+  variante?: 'light' | 'dark';
+  conDescriptor?: boolean;
+  class?: string;
+}
+const { variante = 'light', conDescriptor = true, class: className = '' } = Astro.props;
+const muro = variante === 'dark' ? '#EFE9DE' : '#14110F';
+const escalinata = variante === 'dark' ? '#C98F72' : '#8C4A2F';
+const textoColor = variante === 'dark' ? 'text-cal' : 'text-obsidiana';
+---
+
+<span class={`inline-flex items-center gap-3 ${className}`}>
+  <svg width="34" height="34" viewBox="0 0 120 120" role="img" aria-label="Yaocalli" class="shrink-0">
+    <path d={`M70 106 H106 V14 H14 V106 H50`} fill="none" stroke={muro} stroke-width="11" stroke-linejoin="round"></path>
+    <path d={`M36 86 V70 H60 V54 H84`} fill="none" stroke={escalinata} stroke-width="10" stroke-linejoin="round"></path>
+  </svg>
+  {conDescriptor && (
+    <span class={`font-serif font-bold leading-none ${textoColor}`}>
+      <span class="block text-xl">Yaocalli</span>
+      <span class="block font-sans font-normal text-[9.5px] tracking-[0.19em] mt-0.5">CONSULTORÍA Y ESTRATEGIA</span>
+    </span>
+  )}
+</span>

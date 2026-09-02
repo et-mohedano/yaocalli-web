@@ -1,0 +1,76 @@
+---
+// Gráfica de barras horizontales, en SVG/CSS puro (sin librería). Se anima al
+// entrar en pantalla y respeta prefers-reduced-motion.
+interface Barra {
+  etiqueta: string;
+  valor: number;
+  /** texto a mostrar junto a la barra; por defecto el valor numérico */
+  valorTexto?: string;
+  destacado?: boolean;
+}
+interface Props {
+  datos: readonly Barra[];
+  /** valor máximo de la escala; por defecto el mayor valor de los datos */
+  max?: number;
+  sufijo?: string;
+  class?: string;
+}
+const { datos, max, sufijo = '', class: className = '' } = Astro.props;
+const tope = max ?? Math.max(...datos.map((d) => d.valor));
+const id = `chart-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div class={`bar-chart font-sans ${className}`} id={id}>
+  {datos.map((d) => (
+    <div class="py-2">
+      <div class="flex items-baseline justify-between gap-3 mb-1.5">
+        <span class="text-sm text-g-700 leading-tight">{d.etiqueta}</span>
+        <span class="text-sm font-medium text-obsidiana tabular-nums shrink-0">
+          {d.valorTexto ?? `${d.valor}${sufijo}`}
+        </span>
+      </div>
+      <div class="h-3 bg-white border border-g-300 rounded-sm overflow-hidden">
+        <div
+          class:list={['h-full rounded-sm bar-fill', d.destacado ? 'bg-barro' : 'bg-jade']}
+          style={`--target:${Math.min(100, (d.valor / tope) * 100)}%`}
+        ></div>
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  .bar-fill {
+    width: 0;
+    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bar-chart.in-view .bar-fill {
+    width: var(--target);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar-fill {
+      transition: none;
+      width: var(--target);
+    }
+  }
+</style>
+
+<script>
+  const charts = document.querySelectorAll<HTMLElement>('.bar-chart:not(.in-view)');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            obs.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.3 }
+    );
+    charts.forEach((c) => observer.observe(c));
+  } else {
+    charts.forEach((c) => c.classList.add('in-view'));
+  }
+</script>

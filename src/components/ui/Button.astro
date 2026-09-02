@@ -1,0 +1,24 @@
+---
+interface Props {
+  href: string;
+  variante?: 'accent' | 'outline' | 'ghost';
+  class?: string;
+  external?: boolean;
+}
+const { href, variante = 'accent', class: className = '', external = false } = Astro.props;
+
+const base = 'inline-flex items-center justify-center gap-2 font-sans font-medium text-[17px] px-5 py-3 rounded-sm transition-colors min-h-11';
+const estilos = {
+  accent: 'bg-barro text-cal hover:bg-barro-deep',
+  outline: 'border border-cal text-cal hover:bg-cal hover:text-obsidiana',
+  ghost: 'border border-g-300 text-barro-deep hover:border-barro hover:bg-barro-wash',
+};
+---
+
+<a
+  href={href}
+  class={`${base} ${estilos[variante]} ${className}`}
+  {...external ? { target: '_blank', rel: 'noopener' } : {}}
+>
+  <slot />
+</a>

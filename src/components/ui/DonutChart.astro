@@ -1,0 +1,121 @@
+---
+// Gráfica de dona en SVG puro, con leyenda accesible (el color nunca es la única
+// codificación: siempre va acompañado de etiqueta y valor tabular).
+interface Segmento {
+  etiqueta: string;
+  valor: number;
+  /** color hex de marca, ej. '#3F6B5A' — nunca clase de Tailwind (el JIT no
+   *  detecta clases construidas dinámicamente con interpolación de cadenas) */
+  color: string;
+}
+interface Props {
+  datos: Segmento[];
+  sufijo?: string;
+  centro?: string;
+  centroSub?: string;
+  class?: string;
+}
+const { datos, sufijo = '', centro, centroSub, class: className = '' } = Astro.props;
+
+const total = datos.reduce((acc, d) => acc + d.valor, 0);
+const r = 40;
+const circunferencia = 2 * Math.PI * r;
+
+let acumulado = 0;
+const segmentos = datos.map((d) => {
+  const largo = (d.valor / total) * circunferencia;
+  const offset = -acumulado;
+  acumulado += largo;
+  return { ...d, largo, offset };
+});
+---
+
+<div class={`donut-chart flex flex-col sm:flex-row items-center gap-8 font-sans ${className}`}>
+  <div class="donut-svg-wrap shrink-0">
+    <svg width="180" height="180" viewBox="0 0 100 100" role="img" aria-label={`Gráfica de dona: ${datos.map((d) => `${d.etiqueta} ${d.valor}${sufijo}`).join(', ')}`}>
+      <circle cx="50" cy="50" r={r} fill="none" stroke="#E6E1D7" stroke-width="14" />
+      <g transform="rotate(-90 50 50)">
+        {segmentos.map((s) => (
+          <circle
+            cx="50"
+            cy="50"
+            r={r}
+            fill="none"
+            stroke={s.color}
+            stroke-width="14"
+            stroke-dasharray={`${s.largo} ${circunferencia - s.largo}`}
+            stroke-dashoffset={s.offset}
+          />
+        ))}
+      </g>
+      {centro && (
+        <text x="50" y={centroSub ? '46' : '52'} text-anchor="middle" class="fill-obsidiana font-serif font-bold" style="font-size:15px">
+          {centro}
+        </text>
+      )}
+      {centroSub && (
+        <text x="50" y="60" text-anchor="middle" class="fill-g-600" style="font-size:6.5px">
+          {centroSub}
+        </text>
+      )}
+    </svg>
+  </div>
+  <ul class="donut-legend space-y-2.5 text-sm w-full">
+    {segmentos.map((s, i) => (
+      <li class="flex items-center gap-2.5" style={`transition-delay:${i * 60}ms`}>
+        <span class="inline-block w-3 h-3 rounded-sm shrink-0" style={`background-color:${s.color}`}></span>
+        <span class="text-g-800 flex-1">{s.etiqueta}</span>
+        <span class="text-obsidiana font-medium tabular-nums">{s.valor}{sufijo}</span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .donut-svg-wrap svg {
+    opacity: 0;
+    transform: scale(0.8) rotate(-25deg);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .donut-chart.in-view .donut-svg-wrap svg {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  .donut-legend li {
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .donut-chart.in-view .donut-legend li {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .donut-svg-wrap svg,
+    .donut-legend li {
+      transition: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const charts = document.querySelectorAll<HTMLElement>('.donut-chart:not(.in-view)');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            obs.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.3 }
+    );
+    charts.forEach((c) => observer.observe(c));
+  } else {
+    charts.forEach((c) => c.classList.add('in-view'));
+  }
+</script>

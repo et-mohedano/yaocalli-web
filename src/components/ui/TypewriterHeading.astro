@@ -1,0 +1,115 @@
+---
+// Encabezado con efecto de máquina de escribir. El texto real vive siempre en el
+// DOM (vía aria-label, y como contenido estático de respaldo) para accesibilidad,
+// SEO y usuarios sin JavaScript; la animación es una mejora progresiva encima.
+interface Props {
+  segments: { text: string; italic?: boolean }[];
+  as?: 'h1' | 'h2';
+  class?: string;
+  /** milisegundos por carácter */
+  speed?: number;
+}
+const { segments, as = 'h1', class: className = '', speed = 28 } = Astro.props as Props;
+const Tag = as;
+const textoCompleto = segments.map((s) => s.text).join('');
+---
+
+<Tag class:list={['typewriter', className]} data-tw={JSON.stringify(segments)} data-speed={speed} aria-label={textoCompleto}>
+  <span class="tw-output" aria-hidden="true">
+    {segments.map((s) => (s.italic ? <em class="italic">{s.text}</em> : s.text))}
+  </span><span class="tw-caret" aria-hidden="true"></span>
+</Tag>
+
+<style>
+  .tw-caret {
+    display: inline-block;
+    width: 0.06em;
+    margin-left: 0.05em;
+    height: 0.85em;
+    background: currentColor;
+    vertical-align: -0.1em;
+    opacity: 0.85;
+    animation: tw-blink 0.9s step-end infinite;
+  }
+  .typewriter.tw-done .tw-caret {
+    animation: none;
+    opacity: 0;
+    transition: opacity 0.6s ease 0.15s;
+  }
+  @keyframes tw-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tw-caret {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  function escapeHtml(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  }
+
+  function buildStates(segments: { text: string; italic?: boolean }[]): string[] {
+    const states = [''];
+    let completed = '';
+    for (const seg of segments) {
+      for (let i = 1; i <= seg.text.length; i++) {
+        const partial = escapeHtml(seg.text.slice(0, i));
+        states.push(completed + (seg.italic ? `<em class="italic">${partial}</em>` : partial));
+      }
+      completed += seg.italic ? `<em class="italic">${escapeHtml(seg.text)}</em>` : escapeHtml(seg.text);
+    }
+    return states;
+  }
+
+  function runTypewriter(heading: HTMLElement) {
+    const output = heading.querySelector<HTMLElement>('.tw-output');
+    if (!output) return;
+    let segments: { text: string; italic?: boolean }[];
+    try {
+      segments = JSON.parse(heading.dataset.tw ?? '[]');
+    } catch {
+      return;
+    }
+    const speed = Number(heading.dataset.speed) || 28;
+    const states = buildStates(segments);
+    let i = 0;
+    output.innerHTML = states[0];
+    const tick = () => {
+      i++;
+      output.innerHTML = states[i];
+      if (i < states.length - 1) {
+        setTimeout(tick, speed);
+      } else {
+        heading.classList.add('tw-done');
+      }
+    };
+    setTimeout(tick, speed);
+  }
+
+  const headings = document.querySelectorAll<HTMLElement>('.typewriter');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduced) {
+    headings.forEach((h) => h.classList.add('tw-done'));
+  } else if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            runTypewriter(entry.target as HTMLElement);
+            obs.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    headings.forEach((h) => observer.observe(h));
+  } else {
+    headings.forEach((h) => runTypewriter(h));
+  }
+</script>

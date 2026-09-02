@@ -1,0 +1,125 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+  Tokens de marca — traducidos literalmente de 1_Manual_de_Identidad_Yaocalli.html,
+  sección 10 (resumen técnico). No se inventó ningún color ni tipografía.
+  Tailwind v4 genera utilidades automáticamente a partir de --color-* y --font-*.
+*/
+@theme {
+  /* Marca */
+  --color-obsidiana: #14110f;
+  --color-obsidiana-80: #2a2521;
+  --color-barro: #8c4a2f;
+  --color-barro-deep: #6b3722;
+  --color-barro-pale: #c98f72;
+  --color-barro-wash: #f7ede7;
+  --color-cal: #efe9de;
+
+  /* Cuantitativo */
+  --color-jade: #3f6b5a;
+  --color-jade-deep: #2c4c3f;
+  --color-jade-pale: #7fa593;
+  --color-jade-wash: #e8efeb;
+
+  /* Grises cálidos */
+  --color-g-100: #f5f2ec;
+  --color-g-200: #e6e1d7;
+  --color-g-300: #d2ccbf;
+  --color-g-400: #b0a99b;
+  --color-g-500: #8a8377;
+  --color-g-600: #6a645a;
+  --color-g-700: #4d4841;
+  --color-g-800: #33302b;
+  --color-g-900: #1d1a17;
+
+  /* Semánticos */
+  --color-ok: #3e7a55;
+  --color-ok-text: #2f5e41;
+  --color-warn: #b8862b;
+  --color-warn-text: #8a6218;
+  --color-err: #a33131;
+  --color-info: #35617a;
+
+  /* Tipografía — Alegreya (serifa) y Alegreya Sans (palo seco), superfamilia única */
+  --font-serif: "Alegreya", Georgia, "Times New Roman", serif;
+  --font-sans: "Alegreya Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Retícula cartográfica */
+  --graticule-size: 34px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Escala tipográfica ampliada a petición del cliente (excede el cuerpo base de
+       17.5px del manual de identidad) — sube la base de cálculo de todas las
+       utilidades de Tailwind basadas en rem (text-sm, text-lg, text-2xl, etc.). */
+    font-size: 112.5%;
+  }
+  body {
+    background: var(--color-cal);
+    color: var(--color-obsidiana);
+    font-family: var(--font-serif);
+    font-size: 19px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    line-height: 1.18;
+  }
+  p {
+    max-width: 68ch;
+  }
+  a {
+    color: var(--color-barro-deep);
+  }
+  table {
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-barro);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Retícula cartográfica — elemento gráfico característico de la marca.
+     Solo sobre fondos oscuros o claros, nunca detrás de texto de cuerpo. */
+  .graticule {
+    background-image:
+      linear-gradient(to right, rgba(239, 233, 222, 0.09) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(239, 233, 222, 0.09) 1px, transparent 1px);
+    background-size: var(--graticule-size) var(--graticule-size);
+  }
+  .graticule-light {
+    background-image:
+      linear-gradient(to right, rgba(20, 17, 15, 0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(20, 17, 15, 0.055) 1px, transparent 1px);
+    background-size: var(--graticule-size) var(--graticule-size);
+  }
+
+  /* Medida de lectura para cuerpos largos (notas metodológicas) */
+  .measure {
+    max-width: 68ch;
+  }
+  .measure-sans {
+    max-width: 62ch;
+  }
+}

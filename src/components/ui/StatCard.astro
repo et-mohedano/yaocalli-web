@@ -1,0 +1,96 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  /** texto a mostrar; si se da `numero`, este es solo el valor final tras el conteo */
+  valor: string;
+  /** valor numérico crudo para animar el conteo; omitir si `valor` no es un número (ej. "Menos de 2 meses") */
+  numero?: number;
+  etiqueta: string;
+  /** tipo de proyecto, no la fuente puntual — ej. "Levantamiento en campo", "Proyecto de gobierno estatal" */
+  tipo?: string;
+  icono?: string;
+  destacado?: boolean;
+  class?: string;
+}
+const { valor, numero, etiqueta, tipo, icono, destacado = false, class: className = '' } = Astro.props;
+---
+
+<div
+  class:list={[
+    'stat-card group relative px-5 py-6 border-t-2 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg',
+    destacado ? 'bg-barro-wash border-barro' : 'bg-jade-wash border-jade',
+    className,
+  ]}
+>
+  {icono && (
+    <div
+      class:list={[
+        'w-11 h-11 flex items-center justify-center rounded-sm mb-3 transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-3',
+        destacado ? 'bg-white/70 text-barro-deep' : 'bg-white/70 text-jade-deep',
+      ]}
+    >
+      <Icon name={icono} size={21} />
+    </div>
+  )}
+  <p
+    class:list={['stat-num font-sans font-bold text-[2.5rem] leading-none tabular-nums', destacado ? 'text-barro-deep' : 'text-jade-deep']}
+    data-numero={numero}
+    data-final={valor}
+  >
+    {numero != null ? '0' : valor}
+  </p>
+  <p class="mt-2 font-sans text-[15px] text-g-800 leading-snug">{etiqueta}</p>
+  {tipo && (
+    <span
+      class:list={[
+        'inline-block mt-3 font-sans text-[11px] font-medium px-2 py-1 rounded-sm',
+        destacado ? 'bg-barro/15 text-barro-deep' : 'bg-jade/15 text-jade-deep',
+      ]}
+    >
+      {tipo}
+    </span>
+  )}
+</div>
+
+<script>
+  const nfEntero = new Intl.NumberFormat('es-MX');
+  const nodos = document.querySelectorAll<HTMLElement>('.stat-num[data-numero]:not(.stat-num-animado)');
+
+  function contar(el: HTMLElement) {
+    el.classList.add('stat-num-animado');
+    const destino = Number(el.dataset.numero);
+    const textoFinal = el.dataset.final ?? nfEntero.format(destino);
+    if (!Number.isFinite(destino) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = textoFinal;
+      return;
+    }
+    const duracion = 1200;
+    const inicio = performance.now();
+    function paso(ahora: number) {
+      const t = Math.min(1, (ahora - inicio) / duracion);
+      const avance = 1 - Math.pow(1 - t, 3); // ease-out cúbico
+      el.textContent = nfEntero.format(Math.round(destino * avance));
+      if (t < 1) requestAnimationFrame(paso);
+      else el.textContent = textoFinal;
+    }
+    requestAnimationFrame(paso);
+  }
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            contar(entry.target as HTMLElement);
+            obs.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    nodos.forEach((n) => observer.observe(n));
+  } else {
+    nodos.forEach((n) => contar(n));
+  }
+</script>

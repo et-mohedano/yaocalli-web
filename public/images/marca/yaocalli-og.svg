@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Yaocalli Consultoría y Estrategia">
+  <rect width="1200" height="630" fill="#14110F"/>
+  <g opacity="0.09" stroke="#EFE9DE">
+    <path d="M0 0V630M34 0V630M68 0V630" stroke-width="1"/>
+  </g>
+  <g transform="translate(120,205)">
+    <path d="M70 106 H106 V14 H14 V106 H50" fill="none" stroke="#EFE9DE" stroke-width="11" stroke-linejoin="round"/>
+    <path d="M36 86 V70 H60 V54 H84" fill="none" stroke="#C98F72" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+  <text x="260" y="290" font-family="Georgia, serif" font-size="64" fill="#EFE9DE">Yaocalli</text>
+  <text x="262" y="330" font-family="Arial, sans-serif" font-size="20" letter-spacing="3" fill="#8A8377">CONSULTORÍA Y ESTRATEGIA</text>
+  <text x="120" y="420" font-family="Georgia, serif" font-style="italic" font-size="30" fill="#C98F72">La casa donde el dato se vuelve decisión</text>
+</svg>
