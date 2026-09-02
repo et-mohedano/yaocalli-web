@@ -1,0 +1,30 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# Fuentes de datos crudas de INEGI (GeoJSON de límites municipales + censo ITER).
+# Pesan ~20 MB combinadas y no se sirven al sitio — solo las usa
+# scripts/build-hidalgo-map.mjs para generar src/data/hidalgo-municipios.json,
+# que sí se versiona. Ver PENDIENTES.md, punto 32/34, y el README.
+scripts/fuente-datos/
