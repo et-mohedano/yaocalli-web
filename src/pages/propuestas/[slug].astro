@@ -1,0 +1,563 @@
+---
+// Propuesta técnica privada para un prospecto concreto: no aparece en NAV_PRINCIPAL
+// ni en el sitemap (ver astro.config.mjs), y la página se marca noindex — se
+// comparte por enlace directo. Sigue el mismo patrón de catálogo que
+// src/pages/casos/[slug].astro, pero con secciones propias: panorama del
+// municipio, condición social, cartografía e historial electoral, y el cálculo
+// de tamaño de muestra explicado paso a paso.
+import Layout from '../../layouts/Layout.astro';
+import Hero from '../../components/ui/Hero.astro';
+import Portico from '../../components/ui/Portico.astro';
+import Icon from '../../components/ui/Icon.astro';
+import StatCard from '../../components/ui/StatCard.astro';
+import BarChart from '../../components/ui/BarChart.astro';
+import DonutChart from '../../components/ui/DonutChart.astro';
+import IndexBar from '../../components/ui/IndexBar.astro';
+import Formula from '../../components/ui/Formula.astro';
+import MunicipioSilueta from '../../components/ui/MunicipioSilueta.astro';
+import mapa from '../../data/hidalgo-municipios.json';
+import { propuestas } from '../../data/propuestas';
+import { tamanoMuestra, muestraOperativa, Z_POR_CONFIANZA } from '../../utils/muestra';
+
+export async function getStaticPaths() {
+  return propuestas.map((propuesta) => ({ params: { slug: propuesta.slug }, props: { propuesta } }));
+}
+
+const { propuesta } = Astro.props;
+const municipio = mapa.municipios.find((m) => m.nombre === propuesta.nombreMunicipio)!;
+const censo = municipio.censo!;
+const extra = propuesta.censoAdicional;
+
+const nf = new Intl.NumberFormat('es-MX');
+const nf1 = new Intl.NumberFormat('es-MX', { maximumFractionDigits: 1 });
+function pct(parte: number, total: number, decimales = 1): string {
+  return `${(( parte / total) * 100).toFixed(decimales)}%`;
+}
+
+const secciones = [
+  { id: 'panorama', etiqueta: 'Panorama del municipio', icono: 'map-pin' },
+  { id: 'poblacion', etiqueta: 'Quién vive aquí', icono: 'users' },
+  { id: 'condicion-social', etiqueta: 'Condición social', icono: 'layers' },
+  { id: 'electoral', etiqueta: 'Historial electoral', icono: 'shield' },
+  { id: 'la-encuesta', etiqueta: 'Qué mide la encuesta', icono: 'target' },
+  { id: 'muestra', etiqueta: 'Tamaño de muestra', icono: 'bar-chart' },
+  { id: 'metodo', etiqueta: 'Cómo se levantaría', icono: 'clipboard' },
+];
+
+// --- Tamaño de muestra: escenarios sobre el universo de población adulta (18+) ---
+const universoAdultos = extra.pob18ymas;
+
+const escenariosMargen = [0.07, 0.06, 0.05, 0.04, 0.03].map((e) => {
+  const n = tamanoMuestra(95, e, universoAdultos);
+  return { margen: e, n: Math.ceil(n) };
+});
+
+const escenariosConfianza = [90, 95, 97, 99].map((conf) => {
+  const n = tamanoMuestra(conf, 0.05, universoAdultos);
+  return { confianza: conf, n: Math.ceil(n) };
+});
+
+// Escenario recomendado: 95% de confianza, ±5 puntos — el estándar de la casa
+// para diagnóstico municipal (misma ficha de rigor del servicio de encuestas).
+const nBase = tamanoMuestra(95, 0.05, universoAdultos);
+const tasaNoRespuestaSupuesta = 0.15;
+const nOperativa = Math.ceil(muestraOperativa(nBase, tasaNoRespuestaSupuesta));
+
+// Escenario de mayor precisión: ±4 puntos, mismo nivel de confianza.
+const nBasePrecision = tamanoMuestra(95, 0.04, universoAdultos);
+const nOperativaPrecision = Math.ceil(muestraOperativa(nBasePrecision, tasaNoRespuestaSupuesta));
+
+// Cuotas por sexo: afijación proporcional a la composición real de la población
+// adulta (52.4% mujeres / 47.6% hombres en Chapantongo), no una división a la mitad.
+const propFem = extra.pob18ymasFem / universoAdultos;
+function cuotasPorSexo(n: number) {
+  const mujeres = Math.round(n * propFem);
+  return { mujeres, hombres: n - mujeres };
+}
+const cuotaRecomendada = cuotasPorSexo(Math.ceil(nBase));
+const cuotaOperativa = cuotasPorSexo(nOperativa);
+
+const dimensionesEncuesta = [
+  {
+    titulo: 'Reconocimiento',
+    texto: '¿Sabe quién es y qué cargo ocupa? Sin este dato de base, cualquier cifra de opinión posterior no se puede interpretar.',
+    icono: 'search',
+  },
+  {
+    titulo: 'Imagen y opinión',
+    texto: 'De quienes ya la reconocen, ¿qué tan favorable es su opinión, y por qué motivo la sostienen?',
+    icono: 'trending-up',
+  },
+  {
+    titulo: 'Evaluación de gestión',
+    texto: 'Qué tan bien califica la población su desempeño en el cargo, por tema: obra pública, atención ciudadana, transparencia.',
+    icono: 'check-circle',
+  },
+  {
+    titulo: 'Agenda ciudadana',
+    texto: 'Qué problemas prioriza la población del municipio, para alinear el mensaje público con lo que de verdad le preocupa a la gente.',
+    icono: 'filter',
+  },
+  {
+    titulo: 'Comparación de perfiles',
+    texto: 'Frente a otros posibles perfiles para la contienda, sin necesidad de nombrar terceros si la clienta prefiere no hacerlo todavía.',
+    icono: 'users',
+  },
+  {
+    titulo: 'Intención futura',
+    texto: 'Si el momento político lo amerita, disposición a votar o a respaldar su proyecto en el proceso siguiente.',
+    icono: 'target',
+  },
+];
+---
+
+<Layout title={propuesta.tituloSEO} description={propuesta.metaDescripcion} noindex>
+  <Hero variant="dark" class="py-14" segments={[{ text: `Chapantongo, ${propuesta.estado}` }]}>
+    <p slot="eyebrow" class="font-sans text-sm text-barro-pale font-medium mb-2">Propuesta técnica preliminar</p>
+    <p class="mt-4 font-sans text-lg text-g-400 leading-relaxed max-w-2xl">
+      Diagnóstico de posicionamiento y percepción para {propuesta.nombreClienta}, {propuesta.cargoClienta} de{' '}
+      {propuesta.nombreMunicipio} ({propuesta.periodoClienta}), construido primero con fuentes oficiales —sin levantar
+      todavía una sola encuesta— y después con el tamaño de muestra exacto que se necesita para medir con precisión
+      dentro del municipio.
+    </p>
+    <p class="mt-3 font-sans text-xs text-g-500">
+      Cargo y periodo según{' '}
+      <a href={propuesta.fuenteNombreClientaHref} target="_blank" rel="noopener" class="underline text-g-400">
+        {propuesta.fuenteNombreClienta}
+      </a>
+      .
+    </p>
+  </Hero>
+
+  <nav aria-label="Secciones de la propuesta" class="bg-white border-b border-g-300 py-4 sticky top-[72px] z-30 overflow-x-auto">
+    <ul class="max-w-6xl mx-auto px-5 sm:px-8 flex flex-nowrap lg:flex-wrap gap-x-6 gap-y-2 font-sans text-sm whitespace-nowrap">
+      {secciones.map((s, i) => (
+        <li>
+          <a href={`#${s.id}`} class="inline-flex items-center gap-1.5 text-barro-deep hover:underline">
+            <Icon name={s.icono} size={14} />{i + 1}. {s.etiqueta}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  {/* ---------------------------------------------------------------- PANORAMA */}
+  <section id="panorama" class="bg-cal py-14 scroll-mt-28 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-[1fr_1.2fr] gap-10 items-center">
+      <div>
+        <MunicipioSilueta path={municipio.path} nombre={propuesta.nombreMunicipio} cx={municipio.cx} cy={municipio.cy} class="max-w-sm mx-auto" />
+        <p class="text-center font-sans text-xs text-g-500 mt-2">
+          Silueta territorial real de {propuesta.nombreMunicipio}, a partir del límite municipal oficial de INEGI.
+        </p>
+      </div>
+      <div>
+        <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-4">Panorama del municipio</h2>
+        <p class="font-sans text-[17px] text-g-700 leading-relaxed mb-4">
+          {propuesta.nombreMunicipio} es un municipio del estado de {propuesta.estado}, con {nf.format(censo.tvivhab)} viviendas
+          habitadas y una población repartida en al menos {propuesta.totalLocalidadesConDato} localidades — nadie vive
+          únicamente en la cabecera municipal. Esa dispersión territorial es el primer dato de diseño de cualquier
+          encuesta seria en este municipio: si el levantamiento solo cubre la cabecera, deja fuera a la mayoría de la
+          población.
+        </p>
+        <div class="grid grid-cols-2 gap-3">
+          <StatCard valor={nf.format(censo.pobtot)} numero={censo.pobtot} etiqueta="Población total (2020)" icono="users" />
+          <StatCard valor={nf.format(extra.pob18ymas)} numero={extra.pob18ymas} etiqueta="Población de 18 años y más" icono="target" />
+          <StatCard valor={`${censo.graproes} años`} etiqueta="Escolaridad promedio" icono="book-open" />
+          <StatCard valor={nf.format(censo.tvivhab)} numero={censo.tvivhab} etiqueta="Viviendas habitadas" icono="map" />
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 mt-10">
+      <h3 class="font-serif font-bold text-xl text-obsidiana mb-3">Las diez localidades más grandes</h3>
+      <p class="font-sans text-sm text-g-600 mb-4">
+        De {propuesta.totalLocalidadesConDato} localidades con dato de población, la cabecera municipal ni siquiera es
+        la más grande: Santa María Amealco la supera. Fuente: INEGI, Censo de Población y Vivienda 2020.
+      </p>
+      <BarChart
+        datos={propuesta.localidadesPrincipales.map((l, i) => ({ etiqueta: l.nombre, valor: l.poblacion, destacado: i === 1 }))}
+        sufijo=" hab."
+      />
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------- POBLACIÓN */}
+  <section id="poblacion" class="bg-white py-14 scroll-mt-28 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-4">Quién vive en {propuesta.nombreMunicipio}</h2>
+      <p class="font-sans text-[17px] text-g-700 leading-relaxed max-w-3xl mb-10">
+        Antes de decidir a quién preguntarle, hay que saber quién compone la población. Estas cifras vienen del Censo de
+        Población y Vivienda 2020 de INEGI, la misma fuente que alimenta el mapa de cobertura de Yaocalli.
+      </p>
+
+      <div class="grid lg:grid-cols-2 gap-10">
+        <div>
+          <h3 class="font-serif font-bold text-lg text-obsidiana mb-4">Población por sexo</h3>
+          <DonutChart
+            datos={[
+              { etiqueta: 'Mujeres', valor: censo.pobfem, color: '#8C4A2F' },
+              { etiqueta: 'Hombres', valor: censo.pobmas, color: '#3F6B5A' },
+            ]}
+            centro={nf.format(censo.pobtot)}
+            centroSub="población total"
+          />
+        </div>
+        <div>
+          <h3 class="font-serif font-bold text-lg text-obsidiana mb-4">Población por grandes grupos de edad</h3>
+          <BarChart
+            datos={[
+              { etiqueta: '0 a 14 años', valor: censo.pob0a14, valorTexto: `${nf.format(censo.pob0a14)} (${pct(censo.pob0a14, censo.pobtot)})` },
+              { etiqueta: '15 a 64 años', valor: censo.pob15a64, valorTexto: `${nf.format(censo.pob15a64)} (${pct(censo.pob15a64, censo.pobtot)})`, destacado: true },
+              { etiqueta: '65 años y más', valor: censo.pob65mas, valorTexto: `${nf.format(censo.pob65mas)} (${pct(censo.pob65mas, censo.pobtot)})` },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+        <StatCard valor={pct(extra.pob18ymasFem, extra.pob18ymas)} etiqueta="De la población adulta son mujeres" icono="users" />
+        <StatCard valor={nf.format(extra.pea)} numero={extra.pea} etiqueta="Población económicamente activa" icono="trending-up" />
+        <StatCard valor={pct(extra.desocupada, extra.pea)} etiqueta="Desocupación sobre la PEA" icono="alert-triangle" />
+        <StatCard valor={pct(extra.analfabetismo15ymas, extra.poblacion15ymas)} etiqueta="Analfabetismo en población de 15 años y más" icono="book-open" />
+      </div>
+      <p class="font-sans text-xs text-g-500 mt-4">
+        Fuente: INEGI, Censo de Población y Vivienda 2020, Iter (Hidalgo), fila del total municipal de Chapantongo.
+      </p>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------- CONDICIÓN SOCIAL */}
+  <section id="condicion-social" class="bg-jade-wash py-14 scroll-mt-28 border-b border-jade-pale">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-4">Condición social: marginación y rezago</h2>
+      <p class="font-sans text-[17px] text-g-700 leading-relaxed max-w-3xl mb-8">
+        Marginación, rezago social y pobreza miden cosas distintas, con fuentes distintas — CONAPO, CONEVAL e INEGI,
+        respectivamente. Ninguna de las tres mide percepción ni evaluación de gestión: eso solo lo responde la encuesta.
+      </p>
+
+      {propuesta.marginacion ? (
+        <div class="bg-white border border-jade-pale p-6 mb-6 max-w-2xl">
+          <p class="font-sans text-xs uppercase tracking-wide text-jade-deep font-medium mb-3">
+            Índice de marginación municipal, CONAPO {propuesta.marginacion.anio}
+          </p>
+          <IndexBar
+            etiquetas={['Muy bajo', 'Bajo', 'Medio', 'Alto', 'Muy alto']}
+            activo={['Muy bajo', 'Bajo', 'Medio', 'Alto', 'Muy alto'].indexOf(propuesta.marginacion.grado)}
+          />
+          <p class="font-sans text-sm text-g-700 mt-3">
+            Grado de marginación <strong>{propuesta.marginacion.grado}</strong>
+            {propuesta.marginacion.lugarEstatalDe84 && ` · lugar ${propuesta.marginacion.lugarEstatalDe84} de 84 municipios de Hidalgo`}
+          </p>
+          <p class="font-sans text-xs text-g-500 mt-2">
+            Fuente: <a href={propuesta.marginacion.fuenteHref} target="_blank" rel="noopener" class="underline">{propuesta.marginacion.fuente}</a>
+          </p>
+        </div>
+      ) : (
+        <div class="bg-white border border-g-300 p-6 mb-6 max-w-2xl">
+          <p class="font-sans text-sm text-g-700">
+            Índice de marginación municipal (CONAPO): en verificación contra la fuente oficial antes de incorporarse a
+            esta propuesta, para no citar una cifra sin confirmar.
+          </p>
+        </div>
+      )}
+
+      {propuesta.rezagoSocial && (
+        <p class="font-sans text-sm text-g-700 mb-6 max-w-2xl">
+          Grado de rezago social (CONEVAL, {propuesta.rezagoSocial.anio}): <strong>{propuesta.rezagoSocial.grado}</strong>.
+          Fuente: <a href={propuesta.rezagoSocial.fuenteHref} target="_blank" rel="noopener" class="underline">{propuesta.rezagoSocial.fuente}</a>
+        </p>
+      )}
+
+      {propuesta.pobreza ? (
+        <div class="max-w-2xl">
+          <h3 class="font-serif font-bold text-lg text-obsidiana mb-3">Estimaciones de pobreza municipal, CONEVAL {propuesta.pobreza.anio}</h3>
+          <BarChart
+            datos={[
+              { etiqueta: 'Pobreza', valor: propuesta.pobreza.porcentaje, valorTexto: `${propuesta.pobreza.porcentaje}%` },
+              { etiqueta: 'Pobreza extrema', valor: propuesta.pobreza.porcentajeExtrema, valorTexto: `${propuesta.pobreza.porcentajeExtrema}%`, destacado: true },
+              { etiqueta: 'Vulnerable por carencias sociales', valor: propuesta.pobreza.vulnerablePorCarencias, valorTexto: `${propuesta.pobreza.vulnerablePorCarencias}%` },
+              { etiqueta: 'Vulnerable por ingresos', valor: propuesta.pobreza.vulnerablePorIngresos, valorTexto: `${propuesta.pobreza.vulnerablePorIngresos}%` },
+            ]}
+            max={100}
+          />
+          <p class="font-sans text-xs text-g-500 mt-3">
+            Fuente: <a href={propuesta.pobreza.fuenteHref} target="_blank" rel="noopener" class="underline">{propuesta.pobreza.fuente}</a>
+          </p>
+        </div>
+      ) : (
+        <div class="bg-white border border-g-300 p-6 max-w-2xl">
+          <p class="font-sans text-sm text-g-700">
+            Estimaciones de pobreza municipal (CONEVAL 2020): una fuente secundaria cita 50.0% en pobreza moderada y
+            18.7% en pobreza extrema para Chapantongo, pero sin poder confirmar el año exacto ni el documento oficial
+            de origen — se omiten aquí hasta verificarlas directamente en el portal de datos abiertos de CONEVAL, para
+            no citar una cifra sin confirmar.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------- ELECTORAL */}
+  <section id="electoral" class="bg-white py-14 scroll-mt-28 border-b border-g-300">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-4">Cartografía e historial electoral</h2>
+      <p class="font-sans text-[17px] text-g-700 leading-relaxed max-w-3xl mb-8">
+        La sección electoral, no el municipio, es la unidad territorial que de verdad importa para el diseño de campo:
+        determina dónde vive cada persona empadronada y cómo se reparte la muestra en el territorio.
+      </p>
+
+      <div class="grid sm:grid-cols-2 gap-4 mb-10 max-w-2xl">
+        {propuesta.seccionesElectorales ? (
+          <StatCard
+            valor={nf.format(propuesta.seccionesElectorales.total)}
+            numero={propuesta.seccionesElectorales.total}
+            etiqueta="Secciones electorales en el municipio"
+            icono="map"
+          />
+        ) : (
+          <div class="bg-jade-wash border-t-2 border-jade px-5 py-5">
+            <p class="font-sans text-xs text-g-600">Secciones electorales</p>
+            <p class="font-sans text-obsidiana mt-1">En verificación con cartografía electoral del INE</p>
+          </div>
+        )}
+        {propuesta.listaNominal ? (
+          <StatCard
+            valor={nf.format(propuesta.listaNominal.total)}
+            numero={propuesta.listaNominal.total}
+            etiqueta={`Lista nominal (corte ${propuesta.listaNominal.corte})`}
+            icono="users"
+          />
+        ) : (
+          <div class="bg-jade-wash border-t-2 border-jade px-5 py-5">
+            <p class="font-sans text-xs text-g-600">Lista nominal</p>
+            <p class="font-sans text-obsidiana mt-1">En verificación con el INE</p>
+          </div>
+        )}
+      </div>
+      <p class="font-sans text-xs text-g-500 -mt-6 mb-10 max-w-2xl">
+        {propuesta.seccionesElectorales && (
+          <>
+            Secciones electorales:{' '}
+            <a href={propuesta.seccionesElectorales.fuenteHref} target="_blank" rel="noopener" class="underline">
+              acuerdo de distritación del INE
+            </a>{' '}
+            (cifra por confirmar contra el documento completo).{' '}
+          </>
+        )}
+        {propuesta.listaNominal && (
+          <>
+            Lista nominal:{' '}
+            <a href={propuesta.listaNominal.fuenteHref} target="_blank" rel="noopener" class="underline">
+              {propuesta.listaNominal.fuente}
+            </a>
+            .
+          </>
+        )}
+      </p>
+
+      <h3 class="font-serif font-bold text-lg text-obsidiana mb-4">Últimas elecciones de presidencia municipal</h3>
+      {propuesta.historialElectoral.length > 0 ? (
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-g-300">
+            <thead>
+              <tr class="bg-g-100 text-left">
+                <th class="p-3 font-sans font-medium text-g-700">Año</th>
+                <th class="p-3 font-sans font-medium text-g-700">Ganó</th>
+                <th class="p-3 font-sans font-medium text-g-700">Partido / coalición</th>
+              </tr>
+            </thead>
+            <tbody>
+              {propuesta.historialElectoral.map((el) => (
+                <tr class="border-t border-g-300">
+                  <td class="p-3 tabular-nums">{el.anio}</td>
+                  <td class="p-3">{el.ganador.candidato ?? '—'}</td>
+                  <td class="p-3">{el.ganador.partidoOCoalicion}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="bg-cal border border-g-300 p-6 max-w-2xl">
+          <p class="font-sans text-sm text-g-700">
+            Historial de resultados de presidencia municipal: en verificación contra el Instituto Estatal Electoral de
+            Hidalgo antes de incorporarse a esta propuesta.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------- QUÉ MIDE LA ENCUESTA */}
+  <section id="la-encuesta" class="bg-obsidiana graticule text-cal py-14 scroll-mt-28">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl mb-4">Qué mide una encuesta de posicionamiento</h2>
+      <p class="font-sans text-lg text-g-400 leading-relaxed max-w-3xl mb-10">
+        "Posicionamiento" no es una sola pregunta: es un conjunto de seis dimensiones que, juntas, dicen dónde está
+        parada la {propuesta.cargoClienta} hoy, y qué palanca conviene mover primero.
+      </p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {dimensionesEncuesta.map((d) => (
+          <div class="bg-obsidiana-80 border-t-2 border-barro-pale p-5">
+            <Icon name={d.icono} size={20} class="text-barro-pale mb-3" />
+            <p class="font-serif font-bold text-lg mb-2">{d.titulo}</p>
+            <p class="font-sans text-sm text-g-400 leading-relaxed">{d.texto}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------- TAMAÑO DE MUESTRA */}
+  <section id="muestra" class="bg-white py-14 scroll-mt-28 border-b border-g-300">
+    <div class="max-w-4xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-4">Cuántas personas hay que encuestar</h2>
+      <p class="font-sans text-[17px] text-g-700 leading-relaxed mb-8">
+        La respuesta no depende de una intuición ni de un número redondo: se calcula en tres pasos, a partir del
+        universo real de personas adultas del municipio —{nf.format(universoAdultos)} personas de 18 años y más, según
+        el Censo 2020 de INEGI— y del margen de error que se esté dispuesto a aceptar.
+      </p>
+
+      <div class="bg-cal border border-g-300 p-6 mb-6">
+        <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-3">Paso 1 — tamaño base, si el universo fuera infinito</p>
+        <div class="flex items-center gap-4 flex-wrap">
+          <Formula
+            prefijo="n₀ ="
+            numerador="Z² · p · q"
+            denominador="e²"
+            ariaLabel="n sub cero igual a Z al cuadrado por p por q, todo entre e al cuadrado"
+          />
+        </div>
+        <ul class="mt-5 font-sans text-sm text-g-700 space-y-1.5">
+          <li><strong>Z</strong> — valor asociado al nivel de confianza elegido (1.96 para 95% de confianza, el estándar).</li>
+          <li><strong>p</strong> y <strong>q</strong> — proporción esperada de respuesta y su complemento (1 − p); sin evidencia previa se usa 0.5 y 0.5, el escenario que exige más muestra, para no subestimar.</li>
+          <li><strong>e</strong> — margen de error que se acepta, por ejemplo 0.05 para ±5 puntos porcentuales.</li>
+        </ul>
+      </div>
+
+      <div class="bg-cal border border-g-300 p-6 mb-6">
+        <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-3">Paso 2 — corrección por población finita</p>
+        <Formula
+          prefijo="n ="
+          numerador="n₀ · N"
+          denominador="n₀ + N − 1"
+          ariaLabel="n igual a n sub cero por N, entre n sub cero más N menos 1"
+        />
+        <p class="mt-5 font-sans text-sm text-g-700">
+          <strong>N</strong> es el universo real —aquí, {nf.format(universoAdultos)} personas adultas—, no un número
+          infinito. Esta corrección reduce ligeramente la muestra necesaria porque el universo de Chapantongo, aunque
+          suficiente, no es enorme.
+        </p>
+      </div>
+
+      <div class="bg-cal border border-g-300 p-6 mb-10">
+        <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-3">Paso 3 — colchón por no respuesta esperada</p>
+        <Formula
+          prefijo="n operativa ="
+          numerador="n"
+          denominador="1 − tasa de no respuesta"
+          ariaLabel="n operativa igual a n entre 1 menos la tasa de no respuesta"
+        />
+        <p class="mt-5 font-sans text-sm text-g-700">
+          Si se sabe, por experiencia, que un porcentaje de las personas contactadas no completará el cuestionario, la
+          muestra planeada se aumenta para que la muestra <em>lograda</em> sea la que se necesitaba desde el
+          principio. Para un municipio con población dispersa en muchas localidades pequeñas, se usa como referencia
+          de trabajo una tasa de no respuesta de {(tasaNoRespuestaSupuesta * 100).toFixed(0)}%, calibrable ya en campo.
+        </p>
+      </div>
+
+      <h3 class="font-serif font-bold text-xl text-obsidiana mb-4">Escenarios sobre el universo de Chapantongo</h3>
+      <p class="font-sans text-sm text-g-600 mb-4">Con 95% de confianza (el estándar), variando el margen de error aceptado:</p>
+      <BarChart
+        datos={escenariosMargen.map((e) => ({
+          etiqueta: `±${(e.margen * 100).toFixed(0)} puntos`,
+          valor: e.n,
+          valorTexto: `${nf.format(e.n)} casos`,
+          destacado: e.margen === 0.05,
+        }))}
+        class="mb-10"
+      />
+
+      <p class="font-sans text-sm text-g-600 mb-4">Con margen fijo de ±5 puntos, variando el nivel de confianza:</p>
+      <BarChart
+        datos={escenariosConfianza.map((e) => ({
+          etiqueta: `${e.confianza}% de confianza`,
+          valor: e.n,
+          valorTexto: `${nf.format(e.n)} casos`,
+          destacado: e.confianza === 95,
+        }))}
+        class="mb-10"
+      />
+
+      <div class="bg-barro-wash border-t-2 border-barro p-6">
+        <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-2">Escenario recomendado</p>
+        <p class="font-serif font-bold text-xl text-obsidiana mb-3">
+          {nf.format(Math.ceil(nBase))} cuestionarios completos, ±5 puntos porcentuales, 95% de confianza
+        </p>
+        <p class="font-sans text-[15px] text-g-700 leading-relaxed mb-4">
+          Suponiendo {(tasaNoRespuestaSupuesta * 100).toFixed(0)}% de no respuesta en campo, la muestra operativa a
+          levantar —para terminar con los {nf.format(Math.ceil(nBase))} cuestionarios completos que se necesitan— es de{' '}
+          <strong>{nf.format(nOperativa)} cuestionarios por aplicar</strong>.
+        </p>
+        <p class="font-sans text-[15px] text-g-700 leading-relaxed">
+          Si el proyecto requiere mayor precisión (±4 puntos), la muestra recomendada sube a{' '}
+          <strong>{nf.format(Math.ceil(nBasePrecision))} cuestionarios completos</strong> ({nf.format(nOperativaPrecision)}{' '}
+          por aplicar en campo). Ninguno de los dos escenarios incluye todavía un corte por sección electoral o por
+          localidad: si se necesita ese detalle, cada corte exige su propio mínimo de muestra y el efecto de diseño
+          de un muestreo estratificado, y la muestra total crece para sostenerlos.
+        </p>
+
+        <div class="mt-6 pt-5 border-t border-barro/30">
+          <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-3">
+            Cuotas por sexo, con afijación proporcional a la población adulta ({pct(extra.pob18ymasFem, universoAdultos)} mujeres / {pct(extra.pob18ymasMas, universoAdultos)} hombres)
+          </p>
+          <div class="grid grid-cols-2 gap-4 max-w-md">
+            <div>
+              <p class="font-sans text-2xl font-bold text-barro-deep tabular-nums">{nf.format(cuotaRecomendada.mujeres)}</p>
+              <p class="font-sans text-sm text-g-700">mujeres, de {nf.format(Math.ceil(nBase))} completos</p>
+            </div>
+            <div>
+              <p class="font-sans text-2xl font-bold text-jade-deep tabular-nums">{nf.format(cuotaRecomendada.hombres)}</p>
+              <p class="font-sans text-sm text-g-700">hombres, de {nf.format(Math.ceil(nBase))} completos</p>
+            </div>
+          </div>
+          <p class="font-sans text-xs text-g-500 mt-3">
+            En campo, sobre los {nf.format(nOperativa)} cuestionarios operativos: {nf.format(cuotaOperativa.mujeres)}{' '}
+            mujeres y {nf.format(cuotaOperativa.hombres)} hombres. La misma proporción se aplica a cualquier otro
+            escenario de muestra.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------- MÉTODO */}
+  <section id="metodo" class="bg-jade-wash py-14 scroll-mt-28 border-y border-jade-pale">
+    <div class="max-w-4xl mx-auto px-5 sm:px-8">
+      <h2 class="font-serif font-bold text-2xl sm:text-3xl text-obsidiana mb-4">Cómo se levantaría</h2>
+      <p class="font-sans text-[17px] text-g-700 leading-relaxed mb-6">
+        El mismo método que documenta Yaocalli para cualquier encuesta de percepción: instrumento sin inducción de
+        respuesta, marco muestral estratificado con afijación mixta cuando el universo lo permite, aplicación con
+        control de calidad en campo y ficha técnica completa —universo, muestreo, error por dominio y tasa de
+        respuesta— entregada junto con los resultados, no un número suelto.
+      </p>
+      <ul class="space-y-2.5 font-sans text-[16px] text-g-700 mb-8">
+        <li class="flex gap-2.5"><Icon name="check-circle" size={18} class="text-jade-deep shrink-0 mt-0.5" />Base de datos depurada y geolocalizada por localidad y sección</li>
+        <li class="flex gap-2.5"><Icon name="check-circle" size={18} class="text-jade-deep shrink-0 mt-0.5" />Ficha técnica completa, verificable ante cualquier auditoría o cuestionamiento público</li>
+        <li class="flex gap-2.5"><Icon name="check-circle" size={18} class="text-jade-deep shrink-0 mt-0.5" />Bitácora de campo auditable, con identificador operativo no nominativo por encuestador</li>
+        <li class="flex gap-2.5"><Icon name="check-circle" size={18} class="text-jade-deep shrink-0 mt-0.5" />Levantamiento de 5 a 20 días hábiles, según cobertura territorial final acordada</li>
+      </ul>
+      <p class="font-sans text-sm text-g-600">
+        Detalle completo del método en la ficha de{' '}
+        <a href="/servicios/encuestas-y-opinion-publica/" class="underline text-barro-deep">encuestas y opinión pública</a>.
+      </p>
+    </div>
+  </section>
+
+  <Portico
+    titulo="¿Seguimos con el diseño completo del instrumento?"
+    texto="El siguiente paso es fijar contigo el margen de error objetivo, la cobertura territorial y el calendario de campo."
+    cta={{ etiqueta: 'Conversar sobre esta propuesta', href: '/contacto/' }}
+    conWhatsapp
+  />
+</Layout>
