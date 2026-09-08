@@ -14,5 +14,10 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  integrations: [sitemap()]
+  integrations: [
+    sitemap({
+      // Páginas de prospección privada para un cliente específico: no se listan.
+      filter: (page) => !page.includes('/propuestas/'),
+    })
+  ]
 });
