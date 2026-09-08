@@ -1,0 +1,22 @@
+---
+// Fracción matemática accesible en HTML/CSS puro (sin librería de tipografía
+// matemática): numerador y denominador apilados con una regla divisoria, y un
+// aria-label con la lectura lineal completa para lectores de pantalla.
+interface Props {
+  prefijo?: string;
+  numerador: string;
+  denominador: string;
+  ariaLabel: string;
+  class?: string;
+}
+const { prefijo, numerador, denominador, ariaLabel, class: className = '' } = Astro.props;
+---
+
+<span class={`formula inline-flex items-center gap-3 font-sans ${className}`} role="img" aria-label={ariaLabel}>
+  {prefijo && <span class="text-xl text-obsidiana">{prefijo}</span>}
+  <span class="inline-flex flex-col items-center leading-tight">
+    <span class="px-2 pb-1 text-[15px] sm:text-base text-obsidiana whitespace-nowrap">{numerador}</span>
+    <span class="w-full h-[2px] bg-obsidiana"></span>
+    <span class="px-2 pt-1 text-[15px] sm:text-base text-obsidiana whitespace-nowrap">{denominador}</span>
+  </span>
+</span>
