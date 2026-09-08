@@ -236,7 +236,7 @@ const dimensionesEncuesta = [
       </p>
 
       {propuesta.marginacion ? (
-        <div class="bg-white border border-jade-pale p-6 mb-6 max-w-2xl">
+        <div class="bg-white border border-jade-pale p-6 mb-6 max-w-2xl [&_p]:max-w-none">
           <p class="font-sans text-xs uppercase tracking-wide text-jade-deep font-medium mb-3">
             Índice de marginación municipal, CONAPO {propuesta.marginacion.anio}
           </p>
@@ -253,7 +253,7 @@ const dimensionesEncuesta = [
           </p>
         </div>
       ) : (
-        <div class="bg-white border border-g-300 p-6 mb-6 max-w-2xl">
+        <div class="bg-white border border-g-300 p-6 mb-6 max-w-2xl [&_p]:max-w-none">
           <p class="font-sans text-sm text-g-700">
             Índice de marginación municipal (CONAPO): en verificación contra la fuente oficial antes de incorporarse a
             esta propuesta, para no citar una cifra sin confirmar.
@@ -285,7 +285,7 @@ const dimensionesEncuesta = [
           </p>
         </div>
       ) : (
-        <div class="bg-white border border-g-300 p-6 max-w-2xl">
+        <div class="bg-white border border-g-300 p-6 max-w-2xl [&_p]:max-w-none">
           <p class="font-sans text-sm text-g-700">
             Estimaciones de pobreza municipal (CONEVAL 2020): una fuente secundaria cita 50.0% en pobreza moderada y
             18.7% en pobreza extrema para Chapantongo, pero sin poder confirmar el año exacto ni el documento oficial
@@ -378,7 +378,7 @@ const dimensionesEncuesta = [
           </table>
         </div>
       ) : (
-        <div class="bg-cal border border-g-300 p-6 max-w-2xl">
+        <div class="bg-cal border border-g-300 p-6 max-w-2xl [&_p]:max-w-none">
           <p class="font-sans text-sm text-g-700">
             Historial de resultados de presidencia municipal: en verificación contra el Instituto Estatal Electoral de
             Hidalgo antes de incorporarse a esta propuesta.
@@ -418,7 +418,7 @@ const dimensionesEncuesta = [
         el Censo 2020 de INEGI— y del margen de error que se esté dispuesto a aceptar.
       </p>
 
-      <div class="bg-cal border border-g-300 p-6 mb-6">
+      <div class="bg-cal border border-g-300 p-6 mb-6 [&_p]:max-w-none">
         <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-3">Paso 1 — tamaño base, si el universo fuera infinito</p>
         <div class="flex items-center gap-4 flex-wrap">
           <Formula
@@ -435,7 +435,7 @@ const dimensionesEncuesta = [
         </ul>
       </div>
 
-      <div class="bg-cal border border-g-300 p-6 mb-6">
+      <div class="bg-cal border border-g-300 p-6 mb-6 [&_p]:max-w-none">
         <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-3">Paso 2 — corrección por población finita</p>
         <Formula
           prefijo="n ="
@@ -450,7 +450,7 @@ const dimensionesEncuesta = [
         </p>
       </div>
 
-      <div class="bg-cal border border-g-300 p-6 mb-10">
+      <div class="bg-cal border border-g-300 p-6 mb-10 [&_p]:max-w-none">
         <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-3">Paso 3 — colchón por no respuesta esperada</p>
         <Formula
           prefijo="n operativa ="
@@ -489,7 +489,7 @@ const dimensionesEncuesta = [
         class="mb-10"
       />
 
-      <div class="bg-barro-wash border-t-2 border-barro p-6">
+      <div class="bg-barro-wash border-t-2 border-barro p-6 [&_p]:max-w-none">
         <p class="font-sans text-xs uppercase tracking-wide text-barro-deep font-medium mb-2">Escenario recomendado</p>
         <p class="font-serif font-bold text-xl text-obsidiana mb-3">
           {nf.format(Math.ceil(nBase))} cuestionarios completos, ±5 puntos porcentuales, 95% de confianza
