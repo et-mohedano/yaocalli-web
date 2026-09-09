@@ -1,0 +1,53 @@
+---
+// Silueta de un solo municipio, recortada de su polígono real. Reutiliza el
+// mismo `path` de src/data/hidalgo-municipios.json (límites municipales INEGI,
+// procesados por scripts/build-hidalgo-map.mjs), pero ese `path` vive en el
+// viewBox compartido de los 84 municipios del estado — aquí se recalcula un
+// viewBox propio a partir de las coordenadas del trazo, para que el municipio
+// llene el marco en vez de verse como un punto diminuto dentro del estado.
+interface Props {
+  path: string;
+  nombre: string;
+  cx?: number;
+  cy?: number;
+  class?: string;
+}
+const { path, nombre, cx, cy, class: className = '' } = Astro.props;
+
+const puntos = path
+  .replace(/Z/g, '')
+  .split(/[ML]/)
+  .filter(Boolean)
+  .map((par) => par.split(',').map(Number));
+
+const xs = puntos.map((p) => p[0]);
+const ys = puntos.map((p) => p[1]);
+const minX = Math.min(...xs);
+const maxX = Math.max(...xs);
+const minY = Math.min(...ys);
+const maxY = Math.max(...ys);
+const ancho = maxX - minX;
+const alto = maxY - minY;
+const colchon = Math.max(ancho, alto) * 0.12;
+const viewBox = `${minX - colchon} ${minY - colchon} ${ancho + colchon * 2} ${alto + colchon * 2}`;
+---
+
+<figure class={`municipio-silueta m-0 ${className}`}>
+  <svg viewBox={viewBox} role="img" aria-label={`Silueta territorial del municipio de ${nombre}`} class="w-full h-auto">
+    <path d={path} class="silueta-poly" />
+    {cx != null && cy != null && <circle cx={cx} cy={cy} r={Math.max(ancho, alto) * 0.018} class="silueta-punto" />}
+  </svg>
+</figure>
+
+<style>
+  .silueta-poly {
+    fill: rgba(127, 165, 147, 0.16);
+    stroke: #3f6b5a;
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .silueta-punto {
+    fill: #8c4a2f;
+  }
+</style>
